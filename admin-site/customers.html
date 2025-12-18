@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers - DeskRinger Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🎯 DeskRinger</div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/dashboard.html">Dashboard</a></li>
+                        <li><a href="/customers.html" class="active">Customers</a></li>
+                        <li><a href="/calls.html">Calls</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <span id="admin-name">Loading...</span>
+                    <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="fade-in">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1 style="font-size: 2rem;">Customers</h1>
+                <button onclick="openAddCustomerModal()" class="btn btn-primary">
+                    + Add Customer
+                </button>
+            </div>
+
+            <!-- Customers List -->
+            <div class="card">
+                <div id="customers-container">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Customer Modal -->
+    <div id="customer-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Customer</h2>
+                <button class="modal-close" onclick="closeCustomerModal()">&times;</button>
+            </div>
+
+            <form id="customer-form">
+                <input type="hidden" id="customer-id">
+
+                <div class="form-group">
+                    <label for="business_name">Business Name *</label>
+                    <input type="text" id="business_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact_name">Contact Name</label>
+                    <input type="text" id="contact_name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" placeholder="+1234567890">
+                </div>
+
+                <div class="form-group">
+                    <label for="business_type">Business Type</label>
+                    <select id="business_type">
+                        <option value="">Select type...</option>
+                        <option value="salon">Salon & Spa</option>
+                        <option value="dental">Dental Office</option>
+                        <option value="gym">Gym & Fitness</option>
+                        <option value="auto">Auto Shop</option>
+                        <option value="hvac">HVAC</option>
+                        <option value="medical">Medical Practice</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="forward_to_number">Forward To Number</label>
+                    <input type="tel" id="forward_to_number" placeholder="+1234567890">
+                </div>
+
+                <div class="form-group">
+                    <label for="greeting_message">AI Greeting Message</label>
+                    <textarea id="greeting_message" rows="3" placeholder="Thank you for calling..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeCustomerModal()" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span id="save-text">Save Customer</span>
+                        <span id="save-spinner" class="spinner" style="display: none; width: 20px; height: 20px; margin: 0;"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Require authentication
+        requireAuth();
+
+        let currentCustomerId = null;
+
+        // Load admin info and customers
+        async function loadPage() {
+            try {
+                const admin = await AdminAPI.getMe();
+                document.getElementById('admin-name').textContent = admin.name || admin.email;
+
+                await loadCustomers();
+            } catch (error) {
+                console.error('Error loading page:', error);
+                if (error.message.includes('401') || error.message.includes('token')) {
+                    logout();
+                }
+            }
+        }
+
+        async function loadCustomers() {
+            const container = document.getElementById('customers-container');
+
+            try {
+                const data = await CustomerAPI.getAll();
+                const customers = data.customers || [];
+
+                if (customers.length === 0) {
+                    container.innerHTML = `
+                        <p style="text-align: center; color: #64748b; padding: 3rem;">
+                            No customers yet. Click "Add Customer" to create your first customer.
+                        </p>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Business Name</th>
+                                    <th>Contact</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${customers.map(customer => `
+                                    <tr>
+                                        <td><strong>${customer.business_name}</strong></td>
+                                        <td>
+                                            ${customer.contact_name || ''}<br>
+                                            <small style="color: #64748b;">${customer.email}</small>
+                                        </td>
+                                        <td>${customer.business_type || 'N/A'}</td>
+                                        <td><span class="badge ${getStatusBadge(customer.subscription_status)}">${customer.subscription_status}</span></td>
+                                        <td>${formatDate(customer.created_at)}</td>
+                                        <td>
+                                            <button onclick="editCustomer(${customer.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #ef4444; padding: 2rem;">
+                        Error loading customers: ${error.message}
+                    </p>
+                `;
+            }
+        }
+
+        function openAddCustomerModal() {
+            currentCustomerId = null;
+            document.getElementById('modal-title').textContent = 'Add Customer';
+            document.getElementById('customer-form').reset();
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-modal').classList.add('active');
+        }
+
+        async function editCustomer(id) {
+            currentCustomerId = id;
+            document.getElementById('modal-title').textContent = 'Edit Customer';
+
+            try {
+                const customer = await CustomerAPI.getById(id);
+
+                document.getElementById('customer-id').value = customer.id;
+                document.getElementById('business_name').value = customer.business_name || '';
+                document.getElementById('contact_name').value = customer.contact_name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('phone').value = customer.phone || '';
+                document.getElementById('business_type').value = customer.business_type || '';
+                document.getElementById('forward_to_number').value = customer.forward_to_number || '';
+                document.getElementById('greeting_message').value = customer.greeting_message || '';
+
+                document.getElementById('customer-modal').classList.add('active');
+            } catch (error) {
+                alert('Error loading customer: ' + error.message);
+            }
+        }
+
+        function closeCustomerModal() {
+            document.getElementById('customer-modal').classList.remove('active');
+        }
+
+        document.getElementById('customer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const saveText = document.getElementById('save-text');
+            const saveSpinner = document.getElementById('save-spinner');
+
+            saveText.style.display = 'none';
+            saveSpinner.style.display = 'block';
+
+            const customerData = {
+                business_name: document.getElementById('business_name').value,
+                contact_name: document.getElementById('contact_name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                business_type: document.getElementById('business_type').value,
+                forward_to_number: document.getElementById('forward_to_number').value,
+                greeting_message: document.getElementById('greeting_message').value
+            };
+
+            try {
+                if (currentCustomerId) {
+                    await CustomerAPI.update(currentCustomerId, customerData);
+                } else {
+                    await CustomerAPI.create(customerData);
+                }
+
+                closeCustomerModal();
+                await loadCustomers();
+            } catch (error) {
+                alert('Error saving customer: ' + error.message);
+            } finally {
+                saveText.style.display = 'inline';
+                saveSpinner.style.display = 'none';
+            }
+        });
+
+        function getStatusBadge(status) {
+            const badges = {
+                'active': 'badge-success',
+                'trial': 'badge-info',
+                'cancelled': 'badge-danger',
+                'past_due': 'badge-warning'
+            };
+            return badges[status] || 'badge-info';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        // Load page on load
+        loadPage();
+    </script>
+</body>
+</html>

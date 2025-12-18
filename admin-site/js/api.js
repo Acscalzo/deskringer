@@ -1,0 +1,89 @@
+// API Helper Functions
+
+async function apiRequest(url, options = {}) {
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers: Auth.getHeaders()
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || data.msg || 'API request failed');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+}
+
+// Admin API
+const AdminAPI = {
+    login: async (email, password) => {
+        return await apiRequest(API.LOGIN, {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+        });
+    },
+
+    getMe: async () => {
+        return await apiRequest(API.ME);
+    },
+
+    getStats: async () => {
+        return await apiRequest(API.STATS);
+    }
+};
+
+// Customer API
+const CustomerAPI = {
+    getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = queryString ? `${API.CUSTOMERS}?${queryString}` : API.CUSTOMERS;
+        return await apiRequest(url);
+    },
+
+    getById: async (id) => {
+        return await apiRequest(API.CUSTOMER(id));
+    },
+
+    create: async (customerData) => {
+        return await apiRequest(API.CUSTOMERS, {
+            method: 'POST',
+            body: JSON.stringify(customerData)
+        });
+    },
+
+    update: async (id, customerData) => {
+        return await apiRequest(API.CUSTOMER(id), {
+            method: 'PUT',
+            body: JSON.stringify(customerData)
+        });
+    },
+
+    delete: async (id) => {
+        return await apiRequest(API.CUSTOMER(id), {
+            method: 'DELETE'
+        });
+    }
+};
+
+// Call API
+const CallAPI = {
+    getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = queryString ? `${API.CALLS}?${queryString}` : API.CALLS;
+        return await apiRequest(url);
+    },
+
+    getById: async (id) => {
+        return await apiRequest(API.CALL(id));
+    },
+
+    getRecent: async (limit = 10) => {
+        return await apiRequest(`${API.RECENT_CALLS}?limit=${limit}`);
+    }
+};

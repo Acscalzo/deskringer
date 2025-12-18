@@ -1,0 +1,23 @@
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-CORS==4.0.0
+Flask-JWT-Extended==4.5.3
+Flask-Migrate==4.0.5
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
+gunicorn==21.2.0
+
+# Twilio for phone calls
+twilio==8.11.0
+
+# OpenAI for AI responses
+openai==1.6.1
+
+# Stripe for payments
+stripe==7.8.0
+
+# SendGrid for email notifications
+sendgrid==6.11.0
+
+# Utilities
+requests==2.31.0

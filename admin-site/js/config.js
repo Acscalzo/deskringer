@@ -3,14 +3,14 @@ const API_BASE_URL = 'https://deskringer-api.onrender.com';
 
 // API Endpoints
 const API = {
-    LOGIN: `${API_BASE_URL}/api/admin/login/`,
-    ME: `${API_BASE_URL}/api/admin/me/`,
-    STATS: `${API_BASE_URL}/api/admin/stats/`,
-    CUSTOMERS: `${API_BASE_URL}/api/customers/`,
-    CUSTOMER: (id) => `${API_BASE_URL}/api/customers/${id}/`,
-    CALLS: `${API_BASE_URL}/api/calls/`,
-    CALL: (id) => `${API_BASE_URL}/api/calls/${id}/`,
-    RECENT_CALLS: `${API_BASE_URL}/api/calls/recent/`,
+    LOGIN: `${API_BASE_URL}/api/admin/login`,
+    ME: `${API_BASE_URL}/api/admin/me`,
+    STATS: `${API_BASE_URL}/api/admin/stats`,
+    CUSTOMERS: `${API_BASE_URL}/api/customers`,
+    CUSTOMER: (id) => `${API_BASE_URL}/api/customers/${id}`,
+    CALLS: `${API_BASE_URL}/api/calls`,
+    CALL: (id) => `${API_BASE_URL}/api/calls/${id}`,
+    RECENT_CALLS: `${API_BASE_URL}/api/calls/recent`,
 };
 
 // Auth helpers

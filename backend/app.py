@@ -17,6 +17,9 @@ def create_app():
     # Load configuration
     app.config.from_object('config.Config')
 
+    # Disable strict trailing slashes (allow both /api/endpoint and /api/endpoint/)
+    app.url_map.strict_slashes = False
+
     # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)

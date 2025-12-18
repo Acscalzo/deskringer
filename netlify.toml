@@ -1,6 +1,7 @@
 [build]
   publish = "website"
   command = ""
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF website/"
 
 [[redirects]]
   from = "/*"

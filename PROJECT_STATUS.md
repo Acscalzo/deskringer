@@ -97,7 +97,7 @@
 
 - **Landing Page:** Your Netlify URL
 - **Backend API:** https://deskringer-api.onrender.com
-- **Admin Dashboard:** https://deskringer-admin.netlify.app
+- **Admin Dashboard:** https://admin.deskringer.com (with SSL)
 - **GitHub Repo:** https://github.com/Acscalzo/deskringer
 
 ---
@@ -172,12 +172,13 @@ Break-even: 1 customer covers all infrastructure costs!
 
 ## 🚀 What's Working Right Now
 
-Via Admin Dashboard (https://deskringer-admin.netlify.app):
+Via Admin Dashboard (https://admin.deskringer.com):
 - ✅ Login with JWT authentication
 - ✅ View real-time dashboard stats
 - ✅ Manage customers (add, edit, view)
 - ✅ View call logs and transcripts
 - ✅ Professional dark theme UI
 - ✅ Mobile responsive
+- ✅ Custom domain with SSL
 
 Ready for Twilio integration to start receiving real calls!

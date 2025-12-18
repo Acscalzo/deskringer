@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calls - DeskRinger Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🎯 DeskRinger</div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/dashboard.html">Dashboard</a></li>
+                        <li><a href="/customers.html">Customers</a></li>
+                        <li><a href="/calls.html" class="active">Calls</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <span id="admin-name">Loading...</span>
+                    <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="fade-in">
+            <h1 style="margin-bottom: 2rem; font-size: 2rem;">Call Logs</h1>
+
+            <!-- Call Stats -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <h3>Total Calls</h3>
+                    <div class="value" id="total-calls">0</div>
+                    <div class="label">All time</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Today</h3>
+                    <div class="value" id="today-calls">0</div>
+                    <div class="label">Calls today</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Duration</h3>
+                    <div class="value" id="avg-duration">0s</div>
+                    <div class="label">Per call</div>
+                </div>
+            </div>
+
+            <!-- Calls List -->
+            <div class="card">
+                <div id="calls-container">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Call Detail Modal -->
+    <div id="call-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Call Details</h2>
+                <button class="modal-close" onclick="closeCallModal()">&times;</button>
+            </div>
+
+            <div id="call-details-container">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Require authentication
+        requireAuth();
+
+        // Load admin info and calls
+        async function loadPage() {
+            try {
+                const admin = await AdminAPI.getMe();
+                document.getElementById('admin-name').textContent = admin.name || admin.email;
+
+                const stats = await AdminAPI.getStats();
+                document.getElementById('total-calls').textContent = stats.calls.total;
+                document.getElementById('today-calls').textContent = stats.calls.today;
+                document.getElementById('avg-duration').textContent = formatDuration(stats.calls.avg_duration_seconds);
+
+                await loadCalls();
+            } catch (error) {
+                console.error('Error loading page:', error);
+                if (error.message.includes('401') || error.message.includes('token')) {
+                    logout();
+                }
+            }
+        }
+
+        async function loadCalls() {
+            const container = document.getElementById('calls-container');
+
+            try {
+                const data = await CallAPI.getAll({ per_page: 50 });
+                const calls = data.calls || [];
+
+                if (calls.length === 0) {
+                    container.innerHTML = `
+                        <p style="text-align: center; color: #64748b; padding: 3rem;">
+                            No calls yet. Calls will appear here once customers start receiving them.
+                        </p>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Customer</th>
+                                    <th>Caller</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Callback</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${calls.map(call => `
+                                    <tr>
+                                        <td>${formatDateTime(call.created_at)}</td>
+                                        <td>Customer #${call.customer_id}</td>
+                                        <td>${call.caller_phone || 'Unknown'}</td>
+                                        <td>${formatDuration(call.duration_seconds)}</td>
+                                        <td><span class="badge ${getStatusBadge(call.status)}">${call.status || 'N/A'}</span></td>
+                                        <td>${call.callback_requested ? '<span class="badge badge-warning">Yes</span>' : 'No'}</td>
+                                        <td>
+                                            <button onclick="viewCall(${call.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #ef4444; padding: 2rem;">
+                        Error loading calls: ${error.message}
+                    </p>
+                `;
+            }
+        }
+
+        async function viewCall(id) {
+            const modal = document.getElementById('call-modal');
+            const container = document.getElementById('call-details-container');
+
+            modal.classList.add('active');
+            container.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const call = await CallAPI.getById(id);
+
+                container.innerHTML = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="margin-bottom: 1rem;">Call Information</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div>
+                                <strong>Date:</strong><br>
+                                ${formatDateTime(call.created_at)}
+                            </div>
+                            <div>
+                                <strong>Duration:</strong><br>
+                                ${formatDuration(call.duration_seconds)}
+                            </div>
+                            <div>
+                                <strong>Caller:</strong><br>
+                                ${call.caller_phone || 'Unknown'}
+                            </div>
+                            <div>
+                                <strong>Status:</strong><br>
+                                <span class="badge ${getStatusBadge(call.status)}">${call.status || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${call.summary ? `
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="margin-bottom: 0.5rem;">Summary</h3>
+                            <p style="color: #cbd5e1;">${call.summary}</p>
+                        </div>
+                    ` : ''}
+
+                    ${call.transcript ? `
+                        <div>
+                            <h3 style="margin-bottom: 0.5rem;">Transcript</h3>
+                            <div style="background: #0f172a; padding: 1rem; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+                                <pre style="color: #cbd5e1; white-space: pre-wrap; margin: 0;">${call.transcript}</pre>
+                            </div>
+                        </div>
+                    ` : '<p style="color: #64748b;">No transcript available.</p>'}
+
+                    ${call.callback_requested ? `
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 8px; color: #92400e;">
+                            <strong>⚠️ Callback Requested</strong><br>
+                            This caller requested a callback from the customer.
+                        </div>
+                    ` : ''}
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #ef4444; padding: 2rem;">
+                        Error loading call details: ${error.message}
+                    </p>
+                `;
+            }
+        }
+
+        function closeCallModal() {
+            document.getElementById('call-modal').classList.remove('active');
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '0s';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'completed': 'badge-success',
+                'in_progress': 'badge-info',
+                'failed': 'badge-danger',
+                'no_answer': 'badge-warning'
+            };
+            return badges[status] || 'badge-info';
+        }
+
+        // Load page on load
+        loadPage();
+    </script>
+</body>
+</html>

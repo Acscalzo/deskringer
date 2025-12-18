@@ -22,8 +22,8 @@ def login():
     admin.last_login = datetime.utcnow()
     db.session.commit()
 
-    # Create JWT token
-    access_token = create_access_token(identity=admin.id)
+    # Create JWT token (convert ID to string for Flask-JWT-Extended)
+    access_token = create_access_token(identity=str(admin.id))
 
     return jsonify({
         'access_token': access_token,
@@ -35,7 +35,7 @@ def login():
 @jwt_required()
 def get_current_admin():
     """Get current admin user info"""
-    admin_id = get_jwt_identity()
+    admin_id = int(get_jwt_identity())  # Convert back to int for database query
     admin = Admin.query.get(admin_id)
 
     if not admin:
@@ -75,6 +75,8 @@ def create_admin():
 @jwt_required()
 def get_stats():
     """Get dashboard statistics"""
+    # Verify admin is authenticated (identity will be string from JWT)
+    admin_id = int(get_jwt_identity())
     from models import Customer, Call
     from sqlalchemy import func
 

@@ -11,7 +11,7 @@ gunicorn==21.2.0
 twilio==8.11.0
 
 # OpenAI for AI responses (GPT-4 + TTS)
-openai==1.54.4
+openai==1.40.0
 
 # Stripe for payments
 stripe==7.8.0

@@ -82,13 +82,13 @@ def twilio_gather_webhook():
         </Response>''', 200, {'Content-Type': 'text/xml'}
 
     # Log the caller's speech
+    caller_message = speech_result or '[No speech detected]'
     log = CallLog(
         call_id=call.id,
         speaker='caller',
-        message=speech_result or '[No speech detected]'
+        message=caller_message
     )
     db.session.add(log)
-    db.session.commit()
 
     # TODO: Process with OpenAI and generate response
     # For now, just acknowledge
@@ -101,6 +101,13 @@ def twilio_gather_webhook():
         message=ai_response
     )
     db.session.add(log)
+
+    # Update the Call transcript with the full conversation
+    if call.transcript:
+        call.transcript += f"\n\nCaller: {caller_message}\nAI: {ai_response}"
+    else:
+        call.transcript = f"Caller: {caller_message}\nAI: {ai_response}"
+
     db.session.commit()
 
     # Escape XML special characters in AI response

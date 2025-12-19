@@ -1,0 +1,76 @@
+"""
+AI Service using OpenAI GPT-4 and Text-to-Speech
+"""
+import os
+from openai import OpenAI
+
+
+class AIService:
+    """Handle AI conversations with OpenAI"""
+
+    def __init__(self):
+        self.client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+
+    def get_response(self, customer, caller_message, conversation_history=None):
+        """
+        Get AI response for caller's message
+
+        Args:
+            customer: Customer object with business info and AI instructions
+            caller_message: What the caller just said
+            conversation_history: List of previous messages in this call
+
+        Returns:
+            AI's response text
+        """
+        # Build system prompt
+        system_prompt = f"""You are an AI receptionist for {customer.business_name}.
+
+Business Type: {customer.business_type or 'General business'}
+
+{customer.ai_instructions or 'Be helpful, friendly, and professional. Answer questions about the business, take messages, and help schedule appointments.'}
+
+Keep responses natural, conversational, and brief (1-2 sentences). Sound like a real person, not a robot.
+
+If someone wants to schedule an appointment or needs a callback, collect their name and phone number, then confirm you'll have someone reach out."""
+
+        # Build conversation messages
+        messages = [{"role": "system", "content": system_prompt}]
+
+        # Add conversation history if provided
+        if conversation_history:
+            messages.extend(conversation_history)
+
+        # Add current message
+        messages.append({"role": "user", "content": caller_message})
+
+        # Get response from GPT-4
+        response = self.client.chat.completions.create(
+            model="gpt-4o",  # Latest GPT-4 model
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150  # Keep responses concise
+        )
+
+        ai_response = response.choices[0].message.content
+
+        return ai_response
+
+    def text_to_speech(self, text):
+        """
+        Convert text to natural-sounding speech using OpenAI TTS
+
+        Args:
+            text: Text to convert to speech
+
+        Returns:
+            Audio data (MP3 format)
+        """
+        response = self.client.audio.speech.create(
+            model="tts-1",  # or "tts-1-hd" for higher quality
+            voice="nova",  # Options: alloy, echo, fable, onyx, nova, shimmer
+            input=text,
+            response_format="mp3"
+        )
+
+        return response.content  # Binary MP3 audio data

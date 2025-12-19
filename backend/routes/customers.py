@@ -64,6 +64,7 @@ def create_customer():
         contact_name=data.get('contact_name'),
         email=data['email'],
         phone=data.get('phone'),
+        deskringer_number=data.get('deskringer_number'),
         business_type=data.get('business_type'),
         business_hours=data.get('business_hours'),
         forward_to_number=data.get('forward_to_number'),
@@ -94,7 +95,7 @@ def update_customer(customer_id):
 
     # Update allowed fields
     allowed_fields = [
-        'business_name', 'contact_name', 'email', 'phone',
+        'business_name', 'contact_name', 'email', 'phone', 'deskringer_number',
         'business_type', 'business_hours', 'forward_to_number',
         'greeting_message', 'ai_instructions', 'subscription_status',
         'subscription_tier'

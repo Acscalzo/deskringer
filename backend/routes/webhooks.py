@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from models import db, Customer, Call, CallLog
 from datetime import datetime
+import html
 
 webhooks_bp = Blueprint('webhooks', __name__)
 
@@ -41,13 +42,16 @@ def twilio_voice_webhook():
     # This is a placeholder - you'll integrate OpenAI Realtime API here
     greeting = customer.greeting_message or f"Thank you for calling {customer.business_name}. How can I help you today?"
 
+    # Escape XML special characters in greeting
+    greeting_escaped = html.escape(greeting)
+
     # Use absolute URL for Gather action
     api_base_url = current_app.config['API_BASE_URL']
     gather_url = f"{api_base_url}/api/webhooks/twilio/gather"
 
     twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
     <Response>
-        <Say voice="Polly.Joanna">{greeting}</Say>
+        <Say voice="Polly.Joanna">{greeting_escaped}</Say>
         <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="auto">
             <Say>Please tell me how I can help you.</Say>
         </Gather>
@@ -99,9 +103,12 @@ def twilio_gather_webhook():
     db.session.add(log)
     db.session.commit()
 
+    # Escape XML special characters in AI response
+    ai_response_escaped = html.escape(ai_response)
+
     twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
     <Response>
-        <Say voice="Polly.Joanna">{ai_response}</Say>
+        <Say voice="Polly.Joanna">{ai_response_escaped}</Say>
         <Say>Goodbye!</Say>
         <Hangup/>
     </Response>'''

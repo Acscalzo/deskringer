@@ -69,6 +69,7 @@ def create_customer():
         business_hours=data.get('business_hours'),
         forward_to_number=data.get('forward_to_number'),
         greeting_message=data.get('greeting_message', 'Thank you for calling {business_name}. How can I help you today?'),
+        ai_instructions=data.get('ai_instructions'),
         subscription_status='trial',
         trial_ends_at=datetime.utcnow() + timedelta(days=7)
     )

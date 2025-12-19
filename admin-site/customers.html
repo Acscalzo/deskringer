@@ -76,8 +76,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="phone">Phone</label>
+                    <label for="deskringer_number">DeskRinger Number (Twilio)</label>
+                    <input type="tel" id="deskringer_number" placeholder="+19085032782">
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">The Twilio phone number assigned to this customer</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Contact Phone</label>
                     <input type="tel" id="phone" placeholder="+1234567890">
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">Customer's business contact number</small>
                 </div>
 
                 <div class="form-group">
@@ -219,6 +226,7 @@
                 document.getElementById('business_name').value = customer.business_name || '';
                 document.getElementById('contact_name').value = customer.contact_name || '';
                 document.getElementById('email').value = customer.email || '';
+                document.getElementById('deskringer_number').value = customer.deskringer_number || '';
                 document.getElementById('phone').value = customer.phone || '';
                 document.getElementById('business_type').value = customer.business_type || '';
                 document.getElementById('forward_to_number').value = customer.forward_to_number || '';
@@ -247,6 +255,7 @@
                 business_name: document.getElementById('business_name').value,
                 contact_name: document.getElementById('contact_name').value,
                 email: document.getElementById('email').value,
+                deskringer_number: document.getElementById('deskringer_number').value,
                 phone: document.getElementById('phone').value,
                 business_type: document.getElementById('business_type').value,
                 forward_to_number: document.getElementById('forward_to_number').value,

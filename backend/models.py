@@ -81,6 +81,7 @@ class Customer(db.Model):
             'deskringer_number': self.deskringer_number,
             'forward_to_number': self.forward_to_number,
             'greeting_message': self.greeting_message,
+            'ai_instructions': self.ai_instructions,
             'subscription_status': self.subscription_status,
             'subscription_tier': self.subscription_tier,
             'created_at': self.created_at.isoformat() if self.created_at else None,

@@ -109,6 +109,13 @@
                 <div class="form-group">
                     <label for="greeting_message">AI Greeting Message</label>
                     <textarea id="greeting_message" rows="3" placeholder="Thank you for calling..."></textarea>
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">What the AI says when answering the call</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="ai_instructions">AI Instructions & Context</label>
+                    <textarea id="ai_instructions" rows="6" placeholder="Business hours: Mon-Fri 9am-5pm&#10;We specialize in...&#10;To schedule an appointment, collect their name and phone number..."></textarea>
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">Detailed instructions for how the AI should behave and what information it should provide</small>
                 </div>
 
                 <div style="display: flex; gap: 1rem; justify-content: flex-end;">
@@ -231,6 +238,7 @@
                 document.getElementById('business_type').value = customer.business_type || '';
                 document.getElementById('forward_to_number').value = customer.forward_to_number || '';
                 document.getElementById('greeting_message').value = customer.greeting_message || '';
+                document.getElementById('ai_instructions').value = customer.ai_instructions || '';
 
                 document.getElementById('customer-modal').classList.add('active');
             } catch (error) {
@@ -259,7 +267,8 @@
                 phone: document.getElementById('phone').value,
                 business_type: document.getElementById('business_type').value,
                 forward_to_number: document.getElementById('forward_to_number').value,
-                greeting_message: document.getElementById('greeting_message').value
+                greeting_message: document.getElementById('greeting_message').value,
+                ai_instructions: document.getElementById('ai_instructions').value
             };
 
             try {

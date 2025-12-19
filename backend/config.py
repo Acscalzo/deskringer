@@ -5,6 +5,9 @@ class Config:
     # Basic Flask config
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
+    # API Base URL (for webhook callbacks)
+    API_BASE_URL = os.environ.get('API_BASE_URL', 'https://deskringer-api.onrender.com')
+
     # Database
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///deskringer.db')
 

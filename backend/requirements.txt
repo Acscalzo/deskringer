@@ -10,8 +10,8 @@ gunicorn==21.2.0
 # Twilio for phone calls
 twilio==8.11.0
 
-# OpenAI for AI responses
-openai==1.6.1
+# OpenAI for AI responses (GPT-4 + TTS)
+openai==1.12.0
 
 # Stripe for payments
 stripe==7.8.0

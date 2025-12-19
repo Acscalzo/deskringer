@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, current_app, send_file
 from models import db, Customer, Call, CallLog
 from datetime import datetime
 from io import BytesIO
+from urllib.parse import quote
 import html
 
 webhooks_bp = Blueprint('webhooks', __name__)
@@ -41,13 +42,12 @@ def twilio_voice_webhook():
 
     # Return TwiML response to start AI conversation with OpenAI
     greeting = customer.greeting_message or f"Thank you for calling {customer.business_name}. How can I help you today?"
-    greeting_escaped = html.escape(greeting)
 
     api_base_url = current_app.config['API_BASE_URL']
     gather_url = f"{api_base_url}/api/webhooks/twilio/gather"
 
-    # Use OpenAI TTS voice via <Play> for the greeting
-    greeting_audio_url = f"{api_base_url}/api/webhooks/twilio/tts?text={html.escape(greeting)}&call_id={call.id}"
+    # Use OpenAI TTS voice via <Play> for the greeting (URL encode the text)
+    greeting_audio_url = f"{api_base_url}/api/webhooks/twilio/tts?text={quote(greeting)}&call_id={call.id}"
 
     twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
     <Response>
@@ -121,7 +121,7 @@ def twilio_gather_webhook():
 
     # Use OpenAI TTS for natural-sounding response
     api_base_url = current_app.config['API_BASE_URL']
-    audio_url = f"{api_base_url}/api/webhooks/twilio/tts?text={html.escape(ai_response)}&call_id={call.id}"
+    audio_url = f"{api_base_url}/api/webhooks/twilio/tts?text={quote(ai_response)}&call_id={call.id}"
     gather_url = f"{api_base_url}/api/webhooks/twilio/gather"
 
     # Continue conversation or end call based on context
@@ -131,7 +131,7 @@ def twilio_gather_webhook():
         <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="auto">
             <Pause length="1"/>
         </Gather>
-        <Play>{api_base_url}/api/webhooks/twilio/tts?text=Goodbye!</Play>
+        <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("Goodbye!")}</Play>
         <Hangup/>
     </Response>'''
 

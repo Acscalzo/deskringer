@@ -132,6 +132,7 @@
     </div>
 
     <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script>
         // Require authentication
@@ -296,11 +297,6 @@
                 'past_due': 'badge-warning'
             };
             return badges[status] || 'badge-info';
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            return new Date(dateString).toLocaleDateString();
         }
 
         // Load page on load

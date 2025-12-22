@@ -30,9 +30,13 @@ Business Type: {customer.business_type or 'General business'}
 
 {customer.ai_instructions or 'Be helpful, friendly, and professional. Answer questions about the business, take messages, and help schedule appointments.'}
 
-Keep responses natural, conversational, and brief (1-2 sentences). Sound like a real person, not a robot.
-
-If someone wants to schedule an appointment or needs a callback, collect their name and phone number, then confirm you'll have someone reach out."""
+IMPORTANT INSTRUCTIONS:
+- Keep responses natural, conversational, and brief (1-2 sentences). Sound like a real person, not a robot.
+- Pay close attention to what the caller has ALREADY told you in this conversation.
+- NEVER ask for information the caller has already provided.
+- If the caller gives you multiple pieces of information at once (name, phone, request), acknowledge ALL of it.
+- If someone wants to schedule an appointment or needs a callback, collect their name and phone number, then confirm you'll have someone reach out.
+- If they've already given you their information, don't ask for it again - just confirm and wrap up the call."""
 
         # Build conversation messages
         messages = [{"role": "system", "content": system_prompt}]

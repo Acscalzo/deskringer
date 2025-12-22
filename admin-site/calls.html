@@ -78,6 +78,7 @@
     </div>
 
     <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script>
         // Require authentication
@@ -229,19 +230,6 @@
 
         function closeCallModal() {
             document.getElementById('call-modal').classList.remove('active');
-        }
-
-        function formatDuration(seconds) {
-            if (!seconds) return '0s';
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-        }
-
-        function formatDateTime(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
         }
 
         function getStatusBadge(status) {

@@ -52,8 +52,8 @@ IMPORTANT INSTRUCTIONS:
         response = self.client.chat.completions.create(
             model="gpt-4o",  # Latest GPT-4 model
             messages=messages,
-            temperature=0.7,
-            max_tokens=150  # Keep responses concise
+            temperature=0.5,  # Lower temp for faster, more deterministic responses
+            max_tokens=100  # Keep responses very concise for speed
         )
 
         ai_response = response.choices[0].message.content
@@ -71,10 +71,11 @@ IMPORTANT INSTRUCTIONS:
             Audio data (MP3 format)
         """
         response = self.client.audio.speech.create(
-            model="tts-1",  # or "tts-1-hd" for higher quality
+            model="tts-1",  # Fast model (tts-1-hd is slower but higher quality)
             voice="nova",  # Options: alloy, echo, fable, onyx, nova, shimmer
             input=text,
-            response_format="mp3"
+            response_format="mp3",
+            speed=1.1  # Slightly faster speech (1.0 is normal, max is 4.0)
         )
 
         return response.content  # Binary MP3 audio data

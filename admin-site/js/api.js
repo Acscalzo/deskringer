@@ -7,6 +7,14 @@ async function apiRequest(url, options = {}) {
             headers: Auth.getHeaders()
         });
 
+        // Check for 401 Unauthorized - JWT expired or invalid
+        if (response.status === 401) {
+            console.warn('JWT expired or invalid. Logging out...');
+            Auth.logout();
+            window.location.href = '/index.html';
+            throw new Error('Session expired. Please log in again.');
+        }
+
         const data = await response.json();
 
         if (!response.ok) {

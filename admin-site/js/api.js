@@ -104,6 +104,12 @@ const StripeAPI = {
         });
     },
 
+    createCheckoutSession: async (customerId) => {
+        return await apiRequest(`${API_BASE_URL}/api/stripe/create-checkout-session/${customerId}`, {
+            method: 'POST'
+        });
+    },
+
     getSubscriptionStatus: async (customerId) => {
         return await apiRequest(`${API_BASE_URL}/api/stripe/subscription-status/${customerId}`);
     },

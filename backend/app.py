@@ -35,11 +35,13 @@ def create_app():
     from routes.customers import customers_bp
     from routes.calls import calls_bp
     from routes.webhooks import webhooks_bp
+    from routes.stripe_admin import stripe_admin_bp
 
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(customers_bp, url_prefix='/api/customers')
     app.register_blueprint(calls_bp, url_prefix='/api/calls')
     app.register_blueprint(webhooks_bp, url_prefix='/api/webhooks')
+    app.register_blueprint(stripe_admin_bp, url_prefix='/api/stripe')
 
     # Health check endpoint
     @app.route('/health')

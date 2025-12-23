@@ -98,6 +98,9 @@ def create_checkout_session(customer_id):
             return jsonify({'error': 'Stripe price not configured'}), 500
 
         # Create checkout session
+        # Use admin dashboard URL for success/cancel redirects
+        admin_url = os.environ.get('ADMIN_DASHBOARD_URL', 'https://admin.deskringer.com')
+
         checkout_session = stripe.checkout.Session.create(
             customer=customer.stripe_customer_id,
             payment_method_types=['card'],
@@ -106,8 +109,8 @@ def create_checkout_session(customer_id):
                 'quantity': 1
             }],
             mode='subscription',
-            success_url=os.environ.get('API_BASE_URL', '') + '/success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=os.environ.get('API_BASE_URL', '') + '/cancel',
+            success_url=f"{admin_url}/customers?payment=success&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{admin_url}/customers?payment=cancelled",
             metadata={
                 'deskringer_customer_id': customer.id
             }

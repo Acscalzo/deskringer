@@ -251,15 +251,16 @@
         }
 
         async function getPaymentLink(id) {
-            if (!confirm('Generate a Stripe payment link for this customer?')) {
+            if (!confirm('Generate a Stripe checkout link for this customer?')) {
                 return;
             }
 
             try {
-                const response = await StripeAPI.createPaymentLink(id);
+                // Use checkout session instead of payment link for better customer tracking
+                const response = await StripeAPI.createCheckoutSession(id);
 
-                // Show the payment link in a modal/alert
-                const link = response.payment_link;
+                // Show the checkout URL
+                const link = response.checkout_url;
 
                 // Create a temporary textarea to copy the link
                 const textarea = document.createElement('textarea');
@@ -269,9 +270,9 @@
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
 
-                alert(`Payment link generated and copied to clipboard!\n\n${link}\n\nSend this link to the customer for payment.`);
+                alert(`Checkout link generated and copied to clipboard!\n\n${link}\n\nSend this link to the customer for payment.`);
             } catch (error) {
-                alert('Error generating payment link: ' + error.message);
+                alert('Error generating checkout link: ' + error.message);
             }
         }
 

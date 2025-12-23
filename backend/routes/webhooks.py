@@ -203,9 +203,93 @@ def stripe_webhook():
     Webhook for Stripe payment events
     Handle subscription created, updated, cancelled, payment failed, etc.
     """
-    # TODO: Implement Stripe webhook handling
-    # Verify webhook signature
-    # Process events: customer.subscription.created, updated, deleted, etc.
-    # Update customer subscription status in database
+    import stripe
+    import os
 
-    return jsonify({'status': 'ok'}), 200
+    payload = request.data
+    sig_header = request.headers.get('Stripe-Signature')
+    webhook_secret = os.environ.get('STRIPE_WEBHOOK_SECRET')
+
+    try:
+        # Verify webhook signature
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        print(f"Invalid payload: {e}")
+        return jsonify({'error': 'Invalid payload'}), 400
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        print(f"Invalid signature: {e}")
+        return jsonify({'error': 'Invalid signature'}), 400
+
+    # Handle different event types
+    event_type = event['type']
+    data = event['data']['object']
+
+    print(f"Stripe webhook received: {event_type}")
+
+    # Handle subscription events
+    if event_type == 'customer.subscription.created':
+        # New subscription created
+        stripe_customer_id = data['customer']
+        stripe_subscription_id = data['id']
+        status = data['status']  # active, trialing, etc.
+
+        # Find customer by Stripe customer ID
+        customer = Customer.query.filter_by(stripe_customer_id=stripe_customer_id).first()
+
+        if customer:
+            customer.stripe_subscription_id = stripe_subscription_id
+            customer.subscription_status = 'active' if status == 'active' else status
+            db.session.commit()
+            print(f"Subscription created for customer {customer.id}")
+
+    elif event_type == 'customer.subscription.updated':
+        # Subscription updated (plan change, status change, etc.)
+        stripe_subscription_id = data['id']
+        status = data['status']
+
+        customer = Customer.query.filter_by(stripe_subscription_id=stripe_subscription_id).first()
+
+        if customer:
+            customer.subscription_status = 'active' if status == 'active' else status
+            db.session.commit()
+            print(f"Subscription updated for customer {customer.id}: {status}")
+
+    elif event_type == 'customer.subscription.deleted':
+        # Subscription cancelled
+        stripe_subscription_id = data['id']
+
+        customer = Customer.query.filter_by(stripe_subscription_id=stripe_subscription_id).first()
+
+        if customer:
+            customer.subscription_status = 'cancelled'
+            customer.cancelled_at = datetime.utcnow()
+            db.session.commit()
+            print(f"Subscription cancelled for customer {customer.id}")
+
+    elif event_type == 'invoice.payment_succeeded':
+        # Payment succeeded
+        stripe_customer_id = data['customer']
+
+        customer = Customer.query.filter_by(stripe_customer_id=stripe_customer_id).first()
+
+        if customer and customer.subscription_status != 'active':
+            customer.subscription_status = 'active'
+            db.session.commit()
+            print(f"Payment succeeded for customer {customer.id}")
+
+    elif event_type == 'invoice.payment_failed':
+        # Payment failed
+        stripe_customer_id = data['customer']
+
+        customer = Customer.query.filter_by(stripe_customer_id=stripe_customer_id).first()
+
+        if customer:
+            customer.subscription_status = 'past_due'
+            db.session.commit()
+            print(f"Payment failed for customer {customer.id}")
+
+    return jsonify({'status': 'success'}), 200

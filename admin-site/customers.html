@@ -196,8 +196,11 @@
                                         <td><span class="badge ${getStatusBadge(customer.subscription_status)}">${customer.subscription_status}</span></td>
                                         <td>${formatDate(customer.created_at)}</td>
                                         <td>
-                                            <button onclick="editCustomer(${customer.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+                                            <button onclick="editCustomer(${customer.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">
                                                 Edit
+                                            </button>
+                                            <button onclick="getPaymentLink(${customer.id})" class="btn btn-primary" style="padding: 0.5rem 1rem;">
+                                                💳 Payment Link
                                             </button>
                                         </td>
                                     </tr>
@@ -244,6 +247,31 @@
                 document.getElementById('customer-modal').classList.add('active');
             } catch (error) {
                 alert('Error loading customer: ' + error.message);
+            }
+        }
+
+        async function getPaymentLink(id) {
+            if (!confirm('Generate a Stripe payment link for this customer?')) {
+                return;
+            }
+
+            try {
+                const response = await StripeAPI.createPaymentLink(id);
+
+                // Show the payment link in a modal/alert
+                const link = response.payment_link;
+
+                // Create a temporary textarea to copy the link
+                const textarea = document.createElement('textarea');
+                textarea.value = link;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                alert(`Payment link generated and copied to clipboard!\n\n${link}\n\nSend this link to the customer for payment.`);
+            } catch (error) {
+                alert('Error generating payment link: ' + error.message);
             }
         }
 

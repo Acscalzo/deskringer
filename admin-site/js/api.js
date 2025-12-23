@@ -95,3 +95,22 @@ const CallAPI = {
         return await apiRequest(`${API.RECENT_CALLS}?limit=${limit}`);
     }
 };
+
+// Stripe API
+const StripeAPI = {
+    createPaymentLink: async (customerId) => {
+        return await apiRequest(`${API_BASE_URL}/api/stripe/create-payment-link/${customerId}`, {
+            method: 'POST'
+        });
+    },
+
+    getSubscriptionStatus: async (customerId) => {
+        return await apiRequest(`${API_BASE_URL}/api/stripe/subscription-status/${customerId}`);
+    },
+
+    cancelSubscription: async (customerId) => {
+        return await apiRequest(`${API_BASE_URL}/api/stripe/cancel-subscription/${customerId}`, {
+            method: 'POST'
+        });
+    }
+};

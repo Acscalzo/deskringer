@@ -1,15 +1,15 @@
 """
 AI Service using OpenAI GPT-4 and Text-to-Speech
 
-OPTIMIZATIONS FOR NATURAL CONVERSATION:
+BALANCED OPTIMIZATION FOR QUALITY + SPEED:
 - gpt-4o-mini: 50% faster than gpt-4o, 80% cheaper
-- max_tokens=60: Forces concise responses
-- temperature=0.3: More deterministic = faster
+- max_tokens=85: Allows complete responses
+- temperature=0.5: Natural variety in responses
+- speechTimeout=1.5s: Gives caller time to finish speaking
 - Natural fillers: "Sure", "Let me check" - sounds human
 - TTS speed=0.95: Slower, more conversational pacing
-- Masks processing delay by sounding like natural thinking
 
-Expected latency: 4-6s, but feels natural like human receptionist pausing to think
+Expected latency: 4-6s with good conversation quality
 """
 import os
 from openai import OpenAI
@@ -60,8 +60,8 @@ Rules:
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",  # 50% faster than gpt-4o, 80% cheaper, still high quality
             messages=messages,
-            temperature=0.3,  # Lower temp = faster, more consistent responses
-            max_tokens=60,  # Force very concise responses for speed
+            temperature=0.5,  # Balanced for natural variety
+            max_tokens=85,  # Allows complete responses without cutting off
             presence_penalty=0.3  # Reduce repetition
         )
 

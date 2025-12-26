@@ -52,8 +52,7 @@ def twilio_voice_webhook():
     twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
     <Response>
         <Play>{greeting_audio_url}</Play>
-        <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="auto">
-            <Pause length="1"/>
+        <Gather input="speech" action="{gather_url}" method="POST" timeout="3" speechTimeout="1">
         </Gather>
         <Say>I didn't hear anything. Goodbye.</Say>
         <Hangup/>
@@ -128,8 +127,7 @@ def twilio_gather_webhook():
     twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
     <Response>
         <Play>{audio_url}</Play>
-        <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="auto">
-            <Pause length="1"/>
+        <Gather input="speech" action="{gather_url}" method="POST" timeout="3" speechTimeout="1">
         </Gather>
         <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("Goodbye!")}&amp;call_id={call.id}</Play>
         <Hangup/>

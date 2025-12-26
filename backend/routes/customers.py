@@ -99,7 +99,8 @@ def update_customer(customer_id):
         'business_name', 'contact_name', 'email', 'phone', 'deskringer_number',
         'business_type', 'business_hours', 'forward_to_number',
         'greeting_message', 'ai_instructions', 'subscription_status',
-        'subscription_tier'
+        'subscription_tier', 'notification_email', 'notification_phone',
+        'notification_instructions'
     ]
 
     for field in allowed_fields:

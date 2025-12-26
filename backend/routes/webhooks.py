@@ -192,6 +192,22 @@ def twilio_status_webhook():
 
         db.session.commit()
 
+        # Send notifications if call completed successfully
+        if call_status == 'completed' and call.customer:
+            try:
+                from services.notification_service import NotificationService
+                notification_service = NotificationService()
+
+                # Generate summary of the call
+                summary = notification_service.generate_summary(call.customer, call)
+
+                # Send email and/or SMS notification
+                notification_service.send_call_notification(call.customer, call, summary)
+
+                print(f"Notifications sent for call {call.id}")
+            except Exception as e:
+                print(f"Error sending notifications for call {call.id}: {e}")
+
     return jsonify({'status': 'ok'}), 200
 
 

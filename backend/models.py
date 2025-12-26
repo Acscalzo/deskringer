@@ -55,6 +55,11 @@ class Customer(db.Model):
     greeting_message = db.Column(db.Text)  # Custom greeting
     ai_instructions = db.Column(db.Text)  # Custom instructions for AI behavior
 
+    # Notification Settings
+    notification_email = db.Column(db.String(120))  # Where to send call notifications (defaults to email)
+    notification_phone = db.Column(db.String(20))  # Where to send SMS notifications
+    notification_instructions = db.Column(db.Text)  # How to format notifications for this business
+
     # Subscription
     subscription_status = db.Column(db.String(20), default='trial')  # trial, active, cancelled, past_due
     subscription_tier = db.Column(db.String(20), default='basic')  # basic, premium
@@ -82,6 +87,9 @@ class Customer(db.Model):
             'forward_to_number': self.forward_to_number,
             'greeting_message': self.greeting_message,
             'ai_instructions': self.ai_instructions,
+            'notification_email': self.notification_email,
+            'notification_phone': self.notification_phone,
+            'notification_instructions': self.notification_instructions,
             'subscription_status': self.subscription_status,
             'subscription_tier': self.subscription_tier,
             'created_at': self.created_at.isoformat() if self.created_at else None,

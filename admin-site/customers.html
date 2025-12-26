@@ -118,6 +118,28 @@
                     <small style="color: #64748b; display: block; margin-top: 0.25rem;">Detailed instructions for how the AI should behave and what information it should provide</small>
                 </div>
 
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e5e7eb;">
+
+                <h3 style="margin-bottom: 1rem; color: #1f2937;">📧 Notification Settings</h3>
+
+                <div class="form-group">
+                    <label for="notification_email">Notification Email</label>
+                    <input type="email" id="notification_email" placeholder="owner@business.com">
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">Where to send email alerts after each call (defaults to contact email)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="notification_phone">Notification Phone (SMS)</label>
+                    <input type="tel" id="notification_phone" placeholder="+1234567890">
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">Where to send SMS alerts after each call (optional)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="notification_instructions">Notification Format Instructions</label>
+                    <textarea id="notification_instructions" rows="4" placeholder="Example for pizza shop: Include order details, pickup time, and customer phone&#10;Example for salon: Include service requested, preferred date/time, customer name and phone"></textarea>
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">Instructions for how to format notification messages for this business type (e.g., what info to highlight)</small>
+                </div>
+
                 <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                     <button type="button" onclick="closeCustomerModal()" class="btn btn-secondary">
                         Cancel
@@ -243,6 +265,9 @@
                 document.getElementById('forward_to_number').value = customer.forward_to_number || '';
                 document.getElementById('greeting_message').value = customer.greeting_message || '';
                 document.getElementById('ai_instructions').value = customer.ai_instructions || '';
+                document.getElementById('notification_email').value = customer.notification_email || '';
+                document.getElementById('notification_phone').value = customer.notification_phone || '';
+                document.getElementById('notification_instructions').value = customer.notification_instructions || '';
 
                 document.getElementById('customer-modal').classList.add('active');
             } catch (error) {
@@ -298,7 +323,10 @@
                 business_type: document.getElementById('business_type').value,
                 forward_to_number: document.getElementById('forward_to_number').value,
                 greeting_message: document.getElementById('greeting_message').value,
-                ai_instructions: document.getElementById('ai_instructions').value
+                ai_instructions: document.getElementById('ai_instructions').value,
+                notification_email: document.getElementById('notification_email').value,
+                notification_phone: document.getElementById('notification_phone').value,
+                notification_instructions: document.getElementById('notification_instructions').value
             };
 
             try {

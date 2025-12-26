@@ -52,9 +52,12 @@ def twilio_voice_webhook():
     twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
     <Response>
         <Play>{greeting_audio_url}</Play>
-        <Gather input="speech" action="{gather_url}" method="POST" timeout="3" speechTimeout="2.5" profanityFilter="false">
+        <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="2.0" profanityFilter="false">
         </Gather>
-        <Say>I didn't hear anything. Goodbye.</Say>
+        <Say>Sorry, I didn't catch that. Are you still there?</Say>
+        <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="2.0" profanityFilter="false">
+        </Gather>
+        <Say>I'm having trouble hearing you. Feel free to call back anytime!</Say>
         <Hangup/>
     </Response>'''
 
@@ -127,9 +130,12 @@ def twilio_gather_webhook():
     twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
     <Response>
         <Play>{audio_url}</Play>
-        <Gather input="speech" action="{gather_url}" method="POST" timeout="3" speechTimeout="2.5" profanityFilter="false">
+        <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="2.0" profanityFilter="false">
         </Gather>
-        <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("Goodbye!")}&amp;call_id={call.id}</Play>
+        <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("Are you still there? Anything else I can help with?")}&amp;call_id={call.id}</Play>
+        <Gather input="speech" action="{gather_url}" method="POST" timeout="5" speechTimeout="2.0" profanityFilter="false">
+        </Gather>
+        <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("Okay, thanks for calling! Have a great day!")}&amp;call_id={call.id}</Play>
         <Hangup/>
     </Response>'''
 

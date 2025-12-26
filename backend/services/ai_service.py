@@ -1,15 +1,17 @@
 """
 AI Service using OpenAI GPT-4 and Text-to-Speech
 
-BALANCED OPTIMIZATION FOR QUALITY + SPEED:
-- gpt-4o-mini: 50% faster than gpt-4o, 80% cheaper
-- max_tokens=85: Allows complete responses
-- temperature=0.5: Natural variety in responses
-- speechTimeout=1.5s: Gives caller time to finish speaking
-- Natural fillers: "Sure", "Let me check" - sounds human
-- TTS speed=0.95: Slower, more conversational pacing
+NATURAL CONVERSATION OPTIMIZATION:
+- gpt-4o-mini: Fast, cost-effective, high quality
+- max_tokens=85: Complete, natural responses
+- temperature=0.5: Natural variety and adaptability
+- speechTimeout=2.0s: Waits for caller to finish, handles pauses naturally
+- timeout=5s: Patient - gives time to think/respond
+- Adaptive prompt: Handles mistakes, corrections, pauses gracefully
+- TTS speed=0.95: Natural conversational pacing
+- Second-chance fallbacks: Never hangs up abruptly
 
-Expected latency: 4-6s with good conversation quality
+Expected latency: 4-6s with natural, adaptive conversation flow
 """
 import os
 from openai import OpenAI
@@ -33,18 +35,30 @@ class AIService:
         Returns:
             AI's response text
         """
-        # Build optimized system prompt (shorter = faster processing)
-        system_prompt = f"""You're the receptionist at {customer.business_name}.
+        # Build adaptive system prompt for natural conversation
+        system_prompt = f"""You're a friendly, patient receptionist at {customer.business_name}.
 
 {customer.ai_instructions or 'Answer questions, take messages, help with appointments.'}
 
-Rules:
-- Reply in 1 short sentence
-- Sound natural and conversational - use casual language
-- Start responses with natural fillers like "Sure", "Of course", "Let me check", "Absolutely"
-- Never repeat questions caller already answered
-- Be warm and friendly like talking to a neighbor
-- If they want callback: get name + phone, say you'll have someone call them back soon"""
+Conversation Style:
+- Be conversational and natural - talk like a real person, not a robot
+- Keep responses to 1-2 short sentences max
+- Use natural fillers: "Sure", "Of course", "No problem", "Got it"
+- Be patient and understanding - people pause, correct themselves, make mistakes
+- If someone pauses mid-sentence or seems to continue talking, wait patiently
+- If you didn't understand something, politely ask them to repeat
+- Never abruptly end the conversation - always give them a chance to add more
+
+Handling Information:
+- Remember what they already told you - NEVER ask for the same info twice
+- If they give partial info, acknowledge it and ask for what's missing
+- If they correct themselves, accept the correction gracefully ("No problem, got it!")
+- Keep track of the conversation context
+
+Never say goodbye or end the call unless:
+- They explicitly say goodbye/thanks/that's all
+- You've confirmed you have everything and they seem done
+- Always ask "Is there anything else I can help you with?" before ending"""
 
         # Build conversation messages
         messages = [{"role": "system", "content": system_prompt}]

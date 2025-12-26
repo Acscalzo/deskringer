@@ -1,14 +1,15 @@
 """
 AI Service using OpenAI GPT-4 and Text-to-Speech
 
-OPTIMIZATIONS FOR SPEED:
+OPTIMIZATIONS FOR NATURAL CONVERSATION:
 - gpt-4o-mini: 50% faster than gpt-4o, 80% cheaper
 - max_tokens=60: Forces concise responses
 - temperature=0.3: More deterministic = faster
-- Shorter system prompt: Less processing overhead
-- TTS speed=1.15: 15% faster playback
+- Natural fillers: "Sure", "Let me check" - sounds human
+- TTS speed=0.95: Slower, more conversational pacing
+- Masks processing delay by sounding like natural thinking
 
-Expected latency improvement: 3-6s → 1.5-2.5s per response
+Expected latency: 4-6s, but feels natural like human receptionist pausing to think
 """
 import os
 from openai import OpenAI
@@ -38,11 +39,12 @@ class AIService:
 {customer.ai_instructions or 'Answer questions, take messages, help with appointments.'}
 
 Rules:
-- Reply in 1 sentence max
-- Never repeat questions
-- Remember what caller already said
-- Sound human and friendly
-- If they want callback: get name + phone, confirm someone will call back"""
+- Reply in 1 short sentence
+- Sound natural and conversational - use casual language
+- Start responses with natural fillers like "Sure", "Of course", "Let me check", "Absolutely"
+- Never repeat questions caller already answered
+- Be warm and friendly like talking to a neighbor
+- If they want callback: get name + phone, say you'll have someone call them back soon"""
 
         # Build conversation messages
         messages = [{"role": "system", "content": system_prompt}]
@@ -82,7 +84,7 @@ Rules:
             voice="nova",  # Natural-sounding female voice
             input=text,
             response_format="mp3",
-            speed=1.15  # 15% faster speech - still natural but more responsive
+            speed=0.95  # Slightly slower - sounds more natural and conversational, masks latency
         )
 
         return response.content  # Binary MP3 audio data

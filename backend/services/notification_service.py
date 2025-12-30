@@ -15,10 +15,9 @@ class NotificationService:
         self.sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
         self.from_email = os.environ.get('NOTIFICATION_FROM_EMAIL', 'notifications@deskringer.com')
 
-        # Twilio for SMS
+        # Twilio for SMS (account credentials)
         self.twilio_account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
         self.twilio_auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
-        self.twilio_phone = os.environ.get('TWILIO_PHONE_NUMBER')
 
     def send_call_notification(self, customer, call, transcript_summary):
         """
@@ -68,6 +67,11 @@ class NotificationService:
     def _send_sms_notification(self, customer, call, transcript_summary):
         """Send SMS notification"""
         try:
+            # Use the customer's own Twilio number to send SMS
+            if not customer.deskringer_number:
+                print(f"Cannot send SMS: customer {customer.id} has no deskringer_number")
+                return False
+
             # Build SMS message (keep it short - 160 chars is ideal)
             caller_id = call.caller_name or call.caller_phone
             message_body = f"New call for {customer.business_name}\n"
@@ -75,12 +79,12 @@ class NotificationService:
             message_body += f"Summary: {transcript_summary[:80]}...\n"
             message_body += f"View: https://admin.deskringer.com/calls"
 
-            # Send SMS via Twilio
+            # Send SMS via Twilio from the customer's own phone number
             client = Client(self.twilio_account_sid, self.twilio_auth_token)
 
             message = client.messages.create(
                 body=message_body,
-                from_=self.twilio_phone,
+                from_=customer.deskringer_number,  # Send FROM the customer's Twilio number
                 to=customer.notification_phone
             )
 

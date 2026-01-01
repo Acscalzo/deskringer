@@ -1,4 +1,4 @@
-/* DeskRinger Admin Dashboard Styles */
+/* DeskRinger Admin Dashboard Styles - Professional Light Theme */
 
 * {
     margin: 0;
@@ -8,8 +8,8 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
+    background: #f8fafc;
+    color: #1e293b;
     line-height: 1.6;
 }
 
@@ -21,43 +21,43 @@ body {
 }
 
 .card {
-    background: #1e293b;
-    border-radius: 12px;
+    background: white;
+    border-radius: 8px;
     padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    border: 1px solid #334155;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
 }
 
 .btn {
     padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+    border-radius: 6px;
     border: none;
     cursor: pointer;
     font-weight: 600;
     font-size: 1rem;
-    transition: all 0.3s;
+    transition: all 0.2s;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
 }
 
 .btn-primary {
-    background: #06b6d4;
+    background: #2563eb;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #0891b2;
-    transform: translateY(-2px);
+    background: #1d4ed8;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
 }
 
 .btn-secondary {
-    background: #475569;
-    color: white;
+    background: #e2e8f0;
+    color: #475569;
 }
 
 .btn-secondary:hover {
-    background: #64748b;
+    background: #cbd5e1;
 }
 
 .btn-danger {
@@ -77,7 +77,7 @@ body {
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #cbd5e1;
+    color: #475569;
     font-weight: 500;
 }
 
@@ -86,10 +86,10 @@ body {
 .form-group textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    background: #0f172a;
-    color: #e2e8f0;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    color: #1e293b;
     font-size: 1rem;
 }
 
@@ -97,17 +97,19 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #06b6d4;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 /* Header/Navigation */
 .admin-header {
-    background: #1e293b;
-    border-bottom: 1px solid #334155;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
     padding: 1rem 0;
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .header-content {
@@ -119,7 +121,7 @@ body {
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #06b6d4;
+    color: #2563eb;
 }
 
 .nav-links {
@@ -129,21 +131,22 @@ body {
 }
 
 .nav-links a {
-    color: #cbd5e1;
+    color: #64748b;
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s;
+    transition: color 0.2s;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-    color: #06b6d4;
+    color: #2563eb;
 }
 
 .user-menu {
     display: flex;
     align-items: center;
     gap: 1rem;
+    color: #64748b;
 }
 
 /* Dashboard Grid */
@@ -155,14 +158,15 @@ body {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    background: white;
     padding: 1.5rem;
-    border-radius: 12px;
-    border: 1px solid #334155;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .stat-card h3 {
-    color: #94a3b8;
+    color: #64748b;
     font-size: 0.875rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -172,11 +176,11 @@ body {
 .stat-card .value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #06b6d4;
+    color: #2563eb;
 }
 
 .stat-card .label {
-    color: #64748b;
+    color: #94a3b8;
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
@@ -192,21 +196,21 @@ table {
 }
 
 table th {
-    background: #334155;
+    background: #f8fafc;
     padding: 1rem;
     text-align: left;
     font-weight: 600;
-    color: #cbd5e1;
-    border-bottom: 2px solid #475569;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
 }
 
 table td {
     padding: 1rem;
-    border-bottom: 1px solid #334155;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 table tr:hover {
-    background: #334155;
+    background: #f8fafc;
 }
 
 /* Badges */
@@ -219,29 +223,29 @@ table tr:hover {
 }
 
 .badge-success {
-    background: #10b981;
-    color: white;
+    background: #dcfce7;
+    color: #166534;
 }
 
 .badge-warning {
-    background: #f59e0b;
-    color: white;
+    background: #fef3c7;
+    color: #92400e;
 }
 
 .badge-danger {
-    background: #ef4444;
-    color: white;
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 .badge-info {
-    background: #06b6d4;
-    color: white;
+    background: #dbeafe;
+    color: #1e40af;
 }
 
 /* Alerts */
 .alert {
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 6px;
     margin-bottom: 1rem;
 }
 
@@ -265,8 +269,8 @@ table tr:hover {
 
 /* Loading Spinner */
 .spinner {
-    border: 3px solid #334155;
-    border-top: 3px solid #06b6d4;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #2563eb;
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -287,7 +291,7 @@ table tr:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -298,14 +302,14 @@ table tr:hover {
 }
 
 .modal-content {
-    background: #1e293b;
-    border-radius: 12px;
+    background: white;
+    border-radius: 8px;
     padding: 2rem;
     max-width: 600px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    border: 1px solid #334155;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-header {
@@ -316,13 +320,13 @@ table tr:hover {
 }
 
 .modal-header h2 {
-    color: #e2e8f0;
+    color: #1e293b;
 }
 
 .modal-close {
     background: none;
     border: none;
-    color: #94a3b8;
+    color: #64748b;
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0;
@@ -334,7 +338,7 @@ table tr:hover {
 }
 
 .modal-close:hover {
-    color: #e2e8f0;
+    color: #1e293b;
 }
 
 /* Responsive */

@@ -38,9 +38,7 @@ This is configured in `js/config.js`. Update the `API_BASE_URL` if your backend 
 ### Local Testing
 
 1. Open `index.html` in a browser
-2. Login with your admin credentials:
-   - Email: scalzoadam@gmail.com
-   - Password: Password_Blue23
+2. Login with your admin credentials
 
 **Note:** You may encounter CORS issues when testing locally. Deploy to Netlify for full functionality.
 

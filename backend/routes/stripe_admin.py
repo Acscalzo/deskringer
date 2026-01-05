@@ -7,7 +7,7 @@ from models import db, Customer
 import stripe
 import os
 
-stripe.api_key = os.environ.get('STRIPE_API_KEY')
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
 stripe_admin_bp = Blueprint('stripe_admin', __name__)
 

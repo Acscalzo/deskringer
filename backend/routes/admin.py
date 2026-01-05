@@ -45,8 +45,9 @@ def get_current_admin():
 
 
 @admin_bp.route('/create', methods=['POST'])
+@jwt_required()
 def create_admin():
-    """Create a new admin user (for initial setup - should be protected in production)"""
+    """Create a new admin user (requires authentication)"""
     data = request.get_json()
 
     if not data or not data.get('email') or not data.get('password'):

@@ -24,7 +24,16 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})  # Configure properly for production
+
+    # CORS - Allow only specific origins (admin dashboard and landing page)
+    allowed_origins = [
+        "https://admin.deskringer.com",
+        "https://deskringer.com",
+        "https://www.deskringer.com",
+        "http://localhost:5000",  # For local testing
+        "http://localhost:3000"   # For local testing
+    ]
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 
     # Import models (needed for migrations) - must be after db.init_app
     with app.app_context():

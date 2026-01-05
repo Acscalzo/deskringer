@@ -4,8 +4,25 @@ from datetime import datetime
 from io import BytesIO
 from urllib.parse import quote
 import html
+import os
+from twilio.request_validator import RequestValidator
 
 webhooks_bp = Blueprint('webhooks', __name__)
+
+def validate_twilio_request():
+    """Validate that the request is actually from Twilio"""
+    validator = RequestValidator(os.environ.get('TWILIO_AUTH_TOKEN'))
+
+    # Get the URL that Twilio called (from X-Forwarded-Proto if behind proxy)
+    url = request.url
+    if request.headers.get('X-Forwarded-Proto'):
+        url = url.replace('http://', 'https://')
+
+    # Get the signature from the request headers
+    signature = request.headers.get('X-Twilio-Signature', '')
+
+    # Validate the request
+    return validator.validate(url, request.form, signature)
 
 @webhooks_bp.route('/twilio/voice', methods=['POST'])
 def twilio_voice_webhook():
@@ -13,6 +30,10 @@ def twilio_voice_webhook():
     Webhook endpoint for Twilio incoming calls
     This will be called when a call comes in to a DeskRinger number
     """
+    # Validate request is from Twilio
+    if not validate_twilio_request():
+        return jsonify({'error': 'Invalid request signature'}), 403
+
     # Get Twilio request data
     from_number = request.values.get('From')
     to_number = request.values.get('To')
@@ -70,6 +91,10 @@ def twilio_gather_webhook():
     Webhook for processing speech input from caller
     Uses OpenAI GPT-4 for intelligent responses and TTS for natural voice
     """
+    # Validate request is from Twilio
+    if not validate_twilio_request():
+        return jsonify({'error': 'Invalid request signature'}), 403
+
     from services.ai_service import AIService
 
     speech_result = request.values.get('SpeechResult')

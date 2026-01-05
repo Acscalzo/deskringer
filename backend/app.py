@@ -25,9 +25,10 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
 
-    # CORS - Allow only specific origins (admin dashboard and landing page)
+    # CORS - Allow only specific origins (admin dashboard, customer portal, and landing page)
     allowed_origins = [
         "https://admin.deskringer.com",
+        "https://app.deskringer.com",
         "https://deskringer.com",
         "https://www.deskringer.com",
         "http://localhost:5000",  # For local testing
@@ -45,12 +46,14 @@ def create_app():
     from routes.calls import calls_bp
     from routes.webhooks import webhooks_bp
     from routes.stripe_admin import stripe_admin_bp
+    from routes.customer_portal import customer_portal_bp
 
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(customers_bp, url_prefix='/api/customers')
     app.register_blueprint(calls_bp, url_prefix='/api/calls')
     app.register_blueprint(webhooks_bp, url_prefix='/api/webhooks')
     app.register_blueprint(stripe_admin_bp, url_prefix='/api/stripe')
+    app.register_blueprint(customer_portal_bp, url_prefix='/api/portal')
 
     # Health check endpoint
     @app.route('/health')

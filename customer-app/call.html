@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Details - DeskRinger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">DeskRinger</div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/dashboard.html">Calls</a></li>
+                        <li><a href="/settings.html">Settings</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <span id="business-name">Loading...</span>
+                    <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="fade-in">
+            <!-- Back Button -->
+            <button onclick="window.location.href='/dashboard.html'" class="btn btn-secondary" style="margin-bottom: 1.5rem;">
+                ← Back to Calls
+            </button>
+
+            <!-- Call Details -->
+            <div id="call-details">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Require authentication
+        requireAuth();
+
+        // Get call ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const callId = urlParams.get('id');
+
+        if (!callId) {
+            window.location.href = '/dashboard.html';
+        }
+
+        async function loadCallDetails() {
+            try {
+                // Load customer info
+                const customer = await CustomerAPI.getMe();
+                document.getElementById('business-name').textContent = customer.business_name;
+
+                // Load call details
+                const call = await CallAPI.getById(callId);
+                renderCallDetails(call);
+
+            } catch (error) {
+                console.error('Error loading call details:', error);
+                if (error.message.includes('401') || error.message.includes('token')) {
+                    logout();
+                } else {
+                    document.getElementById('call-details').innerHTML = `
+                        <div class="card" style="text-align: center; padding: 3rem; color: #ef4444;">
+                            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">Call not found</p>
+                            <p style="font-size: 0.9rem;">This call may have been deleted or you don't have access to it.</p>
+                            <button onclick="window.location.href='/dashboard.html'" class="btn btn-primary" style="margin-top: 1.5rem;">
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function renderCallDetails(call) {
+            const container = document.getElementById('call-details');
+
+            container.innerHTML = `
+                <!-- Header Card -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                        <div>
+                            <h1 style="font-size: 1.75rem; margin-bottom: 0.75rem; color: #e2e8f0;">Call from ${call.caller_phone}</h1>
+                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                ${call.handled ? '<span class="badge badge-success">Handled</span>' : '<span class="badge badge-warning">Needs Attention</span>'}
+                                ${call.callback_requested ? '<span class="badge" style="background: #7c3aed;">Callback Requested</span>' : ''}
+                                <span class="badge">${call.status || 'Unknown'}</span>
+                            </div>
+                        </div>
+                        <button id="toggle-handled-btn" class="btn ${call.handled ? 'btn-secondary' : 'btn-primary'}"
+                                onclick="toggleHandled()">
+                            ${call.handled ? 'Mark Unhandled' : 'Mark Handled'}
+                        </button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                        <div>
+                            <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Date & Time</div>
+                            <div style="color: #e2e8f0; font-weight: 500;">${formatFullDateTime(call.created_at)}</div>
+                        </div>
+                        ${call.duration_seconds ? `
+                            <div>
+                                <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Duration</div>
+                                <div style="color: #e2e8f0; font-weight: 500;">${formatDuration(call.duration_seconds)}</div>
+                            </div>
+                        ` : ''}
+                        ${call.intent ? `
+                            <div>
+                                <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Intent</div>
+                                <div style="color: #e2e8f0; font-weight: 500; text-transform: capitalize;">${call.intent}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- Summary Card -->
+                ${call.summary ? `
+                    <div class="card" style="margin-bottom: 1.5rem;">
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: #e2e8f0;">Summary</h2>
+                        <div style="background: #1e293b; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #06b6d4;">
+                            <p style="color: #e2e8f0; line-height: 1.7; white-space: pre-wrap;">${call.summary}</p>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Transcript Card -->
+                ${call.transcript && call.transcript.length > 0 ? `
+                    <div class="card">
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: #e2e8f0;">Full Conversation</h2>
+                        <div class="transcript">
+                            ${call.transcript.map(entry => `
+                                <div class="transcript-entry ${entry.speaker}" style="margin-bottom: 1.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                        <div style="font-weight: 600; color: ${entry.speaker === 'ai' ? '#06b6d4' : '#f59e0b'}; text-transform: capitalize;">
+                                            ${entry.speaker === 'ai' ? 'DeskRinger AI' : 'Caller'}
+                                        </div>
+                                        ${entry.timestamp ? `<div style="color: #64748b; font-size: 0.75rem;">${formatTime(entry.timestamp)}</div>` : ''}
+                                    </div>
+                                    <div style="background: ${entry.speaker === 'ai' ? '#1e293b' : '#78350f'}; padding: 1rem; border-radius: 8px; color: #e2e8f0; line-height: 1.6;">
+                                        ${entry.message}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="card">
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: #e2e8f0;">Transcript</h2>
+                        <p style="color: #64748b; font-style: italic;">No transcript available for this call.</p>
+                    </div>
+                `}
+            `;
+        }
+
+        async function toggleHandled() {
+            try {
+                const call = await CallAPI.getById(callId);
+
+                if (call.handled) {
+                    await CallAPI.markUnhandled(callId);
+                } else {
+                    await CallAPI.markHandled(callId);
+                }
+
+                // Reload call details
+                loadCallDetails();
+            } catch (error) {
+                console.error('Error toggling call status:', error);
+                alert('Failed to update call status. Please try again.');
+            }
+        }
+
+        function formatFullDateTime(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return date.toLocaleString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function formatTime(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '0s';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        }
+
+        // Load data on page load
+        loadCallDetails();
+    </script>
+
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        .badge-warning {
+            background: #78350f;
+            color: #fbbf24;
+        }
+
+        .badge-success {
+            background: #14532d;
+            color: #86efac;
+        }
+    </style>
+</body>
+</html>

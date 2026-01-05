@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DeskRinger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">DeskRinger</div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/dashboard.html" class="active">Calls</a></li>
+                        <li><a href="/settings.html">Settings</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <span id="business-name">Loading...</span>
+                    <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="fade-in">
+            <!-- Stats Overview -->
+            <div class="stats-grid" id="stats-grid">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div style="margin-top: 2rem; margin-bottom: 1.5rem; display: flex; gap: 1rem; border-bottom: 2px solid #1e293b;">
+                <button class="filter-tab active" data-filter="all">
+                    All Calls <span id="count-all" class="badge">0</span>
+                </button>
+                <button class="filter-tab" data-filter="unhandled">
+                    Needs Attention <span id="count-unhandled" class="badge badge-warning">0</span>
+                </button>
+                <button class="filter-tab" data-filter="handled">
+                    Handled <span id="count-handled" class="badge badge-success">0</span>
+                </button>
+            </div>
+
+            <!-- Calls Feed -->
+            <div id="calls-container">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Require authentication
+        requireAuth();
+
+        let currentFilter = 'all';
+        let allCalls = [];
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load customer info
+                const customer = await CustomerAPI.getMe();
+                document.getElementById('business-name').textContent = customer.business_name;
+
+                // Load stats
+                const stats = await CustomerAPI.getStats();
+                renderStats(stats);
+
+                // Load calls
+                const callsData = await CallAPI.getAll({ limit: 100 });
+                allCalls = callsData.calls || [];
+                updateCounts();
+                renderCalls();
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                if (error.message.includes('401') || error.message.includes('token')) {
+                    logout();
+                }
+            }
+        }
+
+        function renderStats(stats) {
+            const statsGrid = document.getElementById('stats-grid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Calls</div>
+                    <div class="stat-value">${stats.total_calls || 0}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Today</div>
+                    <div class="stat-value">${stats.calls_today || 0}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Needs Attention</div>
+                    <div class="stat-value" style="color: #f59e0b;">${stats.unhandled_calls || 0}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Duration</div>
+                    <div class="stat-value">${formatDuration(stats.avg_duration_seconds || 0)}</div>
+                </div>
+            `;
+        }
+
+        function updateCounts() {
+            const total = allCalls.length;
+            const unhandled = allCalls.filter(c => !c.handled).length;
+            const handled = allCalls.filter(c => c.handled).length;
+
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-unhandled').textContent = unhandled;
+            document.getElementById('count-handled').textContent = handled;
+        }
+
+        function renderCalls() {
+            const container = document.getElementById('calls-container');
+
+            // Filter calls based on current filter
+            let filteredCalls = allCalls;
+            if (currentFilter === 'handled') {
+                filteredCalls = allCalls.filter(c => c.handled);
+            } else if (currentFilter === 'unhandled') {
+                filteredCalls = allCalls.filter(c => !c.handled);
+            }
+
+            if (filteredCalls.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 3rem; color: #64748b;">
+                        <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">No calls yet</p>
+                        <p style="font-size: 0.9rem;">When someone calls your DeskRinger number, it will appear here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredCalls.map(call => `
+                <div class="card call-card" style="margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;"
+                     onclick="viewCall(${call.id})"
+                     onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.3)';"
+                     onmouseleave="this.style.transform=''; this.style.boxShadow='';">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600; font-size: 1.1rem; color: #e2e8f0;">${call.caller_phone}</span>
+                                ${call.handled ? '<span class="badge badge-success">Handled</span>' : '<span class="badge badge-warning">Needs Attention</span>'}
+                                ${call.callback_requested ? '<span class="badge" style="background: #7c3aed;">Callback Requested</span>' : ''}
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.875rem;">
+                                ${formatDateTime(call.created_at)}
+                                ${call.duration_seconds ? ` • ${formatDuration(call.duration_seconds)}` : ''}
+                            </div>
+                        </div>
+                        <button class="btn btn-sm ${call.handled ? 'btn-secondary' : 'btn-primary'}"
+                                onclick="event.stopPropagation(); toggleHandled(${call.id}, ${call.handled})"
+                                style="margin-left: 1rem;">
+                            ${call.handled ? 'Mark Unhandled' : 'Mark Handled'}
+                        </button>
+                    </div>
+                    ${call.summary ? `
+                        <div style="background: #1e293b; padding: 1rem; border-radius: 8px; border-left: 3px solid #06b6d4;">
+                            <div style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Summary</div>
+                            <div style="color: #e2e8f0; line-height: 1.6;">${call.summary}</div>
+                        </div>
+                    ` : '<div style="color: #64748b; font-style: italic;">No summary available</div>'}
+                </div>
+            `).join('');
+        }
+
+        async function toggleHandled(callId, isHandled) {
+            try {
+                if (isHandled) {
+                    await CallAPI.markUnhandled(callId);
+                } else {
+                    await CallAPI.markHandled(callId);
+                }
+
+                // Refresh data
+                const callsData = await CallAPI.getAll({ limit: 100 });
+                allCalls = callsData.calls || [];
+                updateCounts();
+                renderCalls();
+
+                // Refresh stats
+                const stats = await CustomerAPI.getStats();
+                renderStats(stats);
+            } catch (error) {
+                console.error('Error toggling call status:', error);
+                alert('Failed to update call status. Please try again.');
+            }
+        }
+
+        function viewCall(callId) {
+            window.location.href = `/call.html?id=${callId}`;
+        }
+
+        function formatDateTime(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            const now = new Date();
+            const diff = now - date;
+            const hours = diff / (1000 * 60 * 60);
+
+            if (hours < 24) {
+                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            } else {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+            }
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '0s';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        }
+
+        // Filter tab handling
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active state
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update filter and re-render
+                currentFilter = tab.dataset.filter;
+                renderCalls();
+            });
+        });
+
+        // Load data on page load
+        loadDashboard();
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+    </script>
+
+    <style>
+        .filter-tab {
+            background: none;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-tab:hover {
+            color: #e2e8f0;
+        }
+
+        .filter-tab.active {
+            color: #06b6d4;
+            border-bottom-color: #06b6d4;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        .badge-warning {
+            background: #78350f;
+            color: #fbbf24;
+        }
+
+        .badge-success {
+            background: #14532d;
+            color: #86efac;
+        }
+    </style>
+</body>
+</html>

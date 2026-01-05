@@ -39,7 +39,9 @@ class Customer(db.Model):
     business_name = db.Column(db.String(200), nullable=False)
     contact_name = db.Column(db.String(100))
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255))  # Password for customer portal access
     phone = db.Column(db.String(20))
+    last_login = db.Column(db.DateTime)  # Track when customer last logged into portal
 
     # Business details
     business_type = db.Column(db.String(50))  # salon, dental, gym, etc.
@@ -73,6 +75,16 @@ class Customer(db.Model):
 
     # Relationships
     calls = db.relationship('Call', backref='customer', lazy='dynamic', cascade='all, delete-orphan')
+
+    def set_password(self, password):
+        """Set password hash for customer portal access"""
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
+
+    def check_password(self, password):
+        """Check password for customer portal login"""
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, password)
 
     def to_dict(self, include_calls=False):
         data = {
@@ -127,6 +139,10 @@ class Call(db.Model):
     summary = db.Column(db.Text)  # AI-generated summary
     intent = db.Column(db.String(50))  # appointment, question, complaint, etc.
     callback_requested = db.Column(db.Boolean, default=False)
+
+    # Customer portal tracking
+    handled = db.Column(db.Boolean, default=False)  # Has customer marked this as handled?
+    handled_at = db.Column(db.DateTime)  # When was it marked as handled?
 
     # Costs (for tracking)
     twilio_cost = db.Column(db.Float)

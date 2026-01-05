@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - DeskRinger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">DeskRinger</div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/dashboard.html">Calls</a></li>
+                        <li><a href="/settings.html" class="active">Settings</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <span id="business-name">Loading...</span>
+                    <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="fade-in">
+            <h1 style="margin-bottom: 2rem; font-size: 2rem;">Settings</h1>
+
+            <!-- Business Information Card -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Business Information</h2>
+
+                <div id="settings-message" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
+
+                <form id="settings-form" style="display: grid; gap: 1.5rem;">
+                    <div>
+                        <label for="business-name-input" class="form-label">Business Name</label>
+                        <input type="text" id="business-name-input" name="business_name" required class="form-input">
+                    </div>
+
+                    <div>
+                        <label for="contact-name" class="form-label">Contact Name</label>
+                        <input type="text" id="contact-name" name="contact_name" class="form-input">
+                    </div>
+
+                    <div>
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-input">
+                    </div>
+
+                    <div>
+                        <label for="business-type" class="form-label">Business Type</label>
+                        <select id="business-type" name="business_type" class="form-input">
+                            <option value="">Select type...</option>
+                            <option value="salon">Salon/Barbershop</option>
+                            <option value="dental">Dental Office</option>
+                            <option value="medical">Medical Practice</option>
+                            <option value="gym">Gym/Fitness</option>
+                            <option value="restaurant">Restaurant</option>
+                            <option value="retail">Retail</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="greeting-message" class="form-label">Greeting Message</label>
+                        <textarea id="greeting-message" name="greeting_message" rows="3" class="form-input"
+                                  placeholder="Thank you for calling..."></textarea>
+                        <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+                            What should the AI say when someone calls?
+                        </small>
+                    </div>
+
+                    <div>
+                        <label for="ai-instructions" class="form-label">AI Instructions</label>
+                        <textarea id="ai-instructions" name="ai_instructions" rows="4" class="form-input"
+                                  placeholder="Be friendly and helpful. Take messages for appointments..."></textarea>
+                        <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+                            Special instructions for how the AI should handle calls
+                        </small>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn btn-primary" id="save-settings-btn">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- DeskRinger Number Card -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1rem;">Your DeskRinger Number</h2>
+                <div style="background: #1e293b; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Customers call this number:</div>
+                    <div id="deskringer-number" style="font-size: 2rem; font-weight: 700; color: #06b6d4; letter-spacing: 0.05em;">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="card">
+                <h2 style="margin-bottom: 1.5rem;">Change Password</h2>
+
+                <div id="password-message" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
+
+                <form id="change-password-form" style="display: grid; gap: 1.5rem; max-width: 500px;">
+                    <div>
+                        <label for="current-password" class="form-label">Current Password</label>
+                        <input type="password" id="current-password" name="current-password" required class="form-input">
+                    </div>
+
+                    <div>
+                        <label for="new-password" class="form-label">New Password</label>
+                        <input type="password" id="new-password" name="new-password" required class="form-input">
+                        <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.25rem; display: block;">Minimum 8 characters</small>
+                    </div>
+
+                    <div>
+                        <label for="confirm-password" class="form-label">Confirm New Password</label>
+                        <input type="password" id="confirm-password" name="confirm-password" required class="form-input">
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn btn-primary" id="change-password-btn">
+                            Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Require authentication
+        requireAuth();
+
+        let customerData = null;
+
+        // Load customer data
+        async function loadCustomerData() {
+            try {
+                customerData = await CustomerAPI.getMe();
+                document.getElementById('business-name').textContent = customerData.business_name;
+
+                // Populate form
+                document.getElementById('business-name-input').value = customerData.business_name || '';
+                document.getElementById('contact-name').value = customerData.contact_name || '';
+                document.getElementById('phone').value = customerData.phone || '';
+                document.getElementById('business-type').value = customerData.business_type || '';
+                document.getElementById('greeting-message').value = customerData.greeting_message || '';
+                document.getElementById('ai-instructions').value = customerData.ai_instructions || '';
+                document.getElementById('deskringer-number').textContent = customerData.deskringer_number || 'Not assigned';
+
+            } catch (error) {
+                console.error('Error loading customer data:', error);
+                if (error.message.includes('401') || error.message.includes('token')) {
+                    logout();
+                }
+            }
+        }
+
+        // Handle settings form submission
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const settings = Object.fromEntries(formData.entries());
+            const messageDiv = document.getElementById('settings-message');
+            const submitBtn = document.getElementById('save-settings-btn');
+
+            messageDiv.style.display = 'none';
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+
+                await CustomerAPI.updateSettings(settings);
+
+                messageDiv.textContent = 'Settings saved successfully!';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#14532d';
+                messageDiv.style.color = '#86efac';
+
+                // Reload data
+                await loadCustomerData();
+
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                messageDiv.textContent = error.message || 'Failed to save settings';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#7f1d1d';
+                messageDiv.style.color = '#fca5a5';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Changes';
+            }
+        });
+
+        // Handle password change form submission
+        document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const messageDiv = document.getElementById('password-message');
+            const submitBtn = document.getElementById('change-password-btn');
+
+            messageDiv.style.display = 'none';
+
+            if (newPassword !== confirmPassword) {
+                messageDiv.textContent = 'New passwords do not match';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#7f1d1d';
+                messageDiv.style.color = '#fca5a5';
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                messageDiv.textContent = 'Password must be at least 8 characters';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#7f1d1d';
+                messageDiv.style.color = '#fca5a5';
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Changing Password...';
+
+                await CustomerAPI.changePassword(currentPassword, newPassword);
+
+                messageDiv.textContent = 'Password changed successfully!';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#14532d';
+                messageDiv.style.color = '#86efac';
+
+                document.getElementById('change-password-form').reset();
+
+            } catch (error) {
+                console.error('Error changing password:', error);
+                messageDiv.textContent = error.message || 'Failed to change password';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#7f1d1d';
+                messageDiv.style.color = '#fca5a5';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Change Password';
+            }
+        });
+
+        // Load data on page load
+        loadCustomerData();
+    </script>
+
+    <style>
+        .form-label {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #334155;
+            color: #f1f5f9;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+        }
+    </style>
+</body>
+</html>

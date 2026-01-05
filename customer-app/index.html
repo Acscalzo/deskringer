@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DeskRinger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #06b6d4;
+        }
+
+        .login-header p {
+            color: #94a3b8;
+        }
+
+        .login-form {
+            margin-top: 2rem;
+        }
+
+        .login-footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card card">
+            <div class="login-header">
+                <h1>DeskRinger</h1>
+                <p>Customer Portal</p>
+            </div>
+
+            <div id="error-message" class="error-message"></div>
+
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        autofocus
+                        placeholder="your-email@example.com"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        placeholder="Enter your password"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <span id="login-text">Login</span>
+                    <span id="login-spinner" class="spinner" style="display: none; width: 20px; height: 20px; margin: 0;"></span>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>&copy; 2025 DeskRinger. All rights reserved.</p>
+                <p style="margin-top: 0.5rem;">
+                    <a href="https://deskringer.com" style="color: #60a5fa; text-decoration: none;">Back to website</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Check if already logged in
+        if (Auth.isAuthenticated()) {
+            window.location.href = '/dashboard.html';
+        }
+
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('error-message');
+        const loginText = document.getElementById('login-text');
+        const loginSpinner = document.getElementById('login-spinner');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Show loading state
+            loginText.style.display = 'none';
+            loginSpinner.style.display = 'block';
+            errorMessage.classList.remove('show');
+
+            try {
+                const response = await CustomerAPI.login(email, password);
+
+                // Save token
+                Auth.setToken(response.access_token);
+
+                // Redirect to dashboard
+                window.location.href = '/dashboard.html';
+            } catch (error) {
+                // Show error - use friendly message instead of technical error
+                errorMessage.textContent = 'Incorrect email or password. Please try again.';
+                errorMessage.classList.add('show');
+
+                // Reset button
+                loginText.style.display = 'inline';
+                loginSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

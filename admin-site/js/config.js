@@ -6,6 +6,7 @@ const API = {
     LOGIN: `${API_BASE_URL}/api/admin/login`,
     ME: `${API_BASE_URL}/api/admin/me`,
     STATS: `${API_BASE_URL}/api/admin/stats`,
+    CHANGE_PASSWORD: `${API_BASE_URL}/api/admin/change-password`,
     CUSTOMERS: `${API_BASE_URL}/api/customers`,
     CUSTOMER: (id) => `${API_BASE_URL}/api/customers/${id}`,
     CALLS: `${API_BASE_URL}/api/calls`,

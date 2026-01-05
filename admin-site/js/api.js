@@ -43,6 +43,16 @@ const AdminAPI = {
 
     getStats: async () => {
         return await apiRequest(API.STATS);
+    },
+
+    changePassword: async (currentPassword, newPassword) => {
+        return await apiRequest(API.CHANGE_PASSWORD, {
+            method: 'POST',
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        });
     }
 };
 

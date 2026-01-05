@@ -71,6 +71,32 @@ def create_admin():
     }), 201
 
 
+@admin_bp.route('/change-password', methods=['POST'])
+@jwt_required()
+def change_password():
+    """Change admin password"""
+    admin_id = int(get_jwt_identity())
+    admin = Admin.query.get(admin_id)
+
+    if not admin:
+        return jsonify({'error': 'Admin not found'}), 404
+
+    data = request.get_json()
+
+    if not data or not data.get('current_password') or not data.get('new_password'):
+        return jsonify({'error': 'Current password and new password required'}), 400
+
+    # Verify current password
+    if not admin.check_password(data['current_password']):
+        return jsonify({'error': 'Current password is incorrect'}), 401
+
+    # Set new password
+    admin.set_password(data['new_password'])
+    db.session.commit()
+
+    return jsonify({'message': 'Password changed successfully'}), 200
+
+
 @admin_bp.route('/stats', methods=['GET'])
 @jwt_required()
 def get_stats():

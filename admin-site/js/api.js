@@ -86,6 +86,13 @@ const CustomerAPI = {
         return await apiRequest(API.CUSTOMER(id), {
             method: 'DELETE'
         });
+    },
+
+    setPassword: async (id, password) => {
+        return await apiRequest(API.SET_CUSTOMER_PASSWORD(id), {
+            method: 'POST',
+            body: JSON.stringify({ password })
+        });
     }
 };
 

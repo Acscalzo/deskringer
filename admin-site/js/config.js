@@ -9,6 +9,7 @@ const API = {
     CHANGE_PASSWORD: `${API_BASE_URL}/api/admin/change-password`,
     CUSTOMERS: `${API_BASE_URL}/api/customers`,
     CUSTOMER: (id) => `${API_BASE_URL}/api/customers/${id}`,
+    SET_CUSTOMER_PASSWORD: (id) => `${API_BASE_URL}/api/customers/${id}/set-password`,
     CALLS: `${API_BASE_URL}/api/calls`,
     CALL: (id) => `${API_BASE_URL}/api/calls/${id}`,
     RECENT_CALLS: `${API_BASE_URL}/api/calls/recent`,

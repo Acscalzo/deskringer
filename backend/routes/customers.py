@@ -159,3 +159,36 @@ def update_customer_settings(customer_id):
         'message': 'Settings updated successfully',
         'customer': customer.to_dict()
     }), 200
+
+
+@customers_bp.route('/<int:customer_id>/set-password', methods=['POST'])
+@jwt_required()
+def set_customer_password(customer_id):
+    """Set password for customer portal access (admin only)"""
+    customer = Customer.query.get(customer_id)
+
+    if not customer:
+        return jsonify({'error': 'Customer not found'}), 404
+
+    data = request.get_json()
+
+    if not data or not data.get('password'):
+        return jsonify({'error': 'Password required'}), 400
+
+    # Validate password length
+    if len(data['password']) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+
+    # Set password for customer portal access
+    customer.set_password(data['password'])
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Password set successfully',
+        'customer': {
+            'id': customer.id,
+            'email': customer.email,
+            'business_name': customer.business_name,
+            'has_portal_access': True
+        }
+    }), 200

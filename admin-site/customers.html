@@ -153,6 +153,51 @@
         </div>
     </div>
 
+    <!-- Set Password Modal -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Set Customer Password</h2>
+                <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+            </div>
+
+            <div style="background: #1e293b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.25rem;">Business</div>
+                <div id="password-business-name" style="color: #e2e8f0; font-weight: 600; font-size: 1.1rem;"></div>
+                <div style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.5rem;">Login Email</div>
+                <div id="password-email" style="color: #06b6d4; font-family: monospace;"></div>
+            </div>
+
+            <div id="password-message" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
+
+            <form id="password-form">
+                <input type="hidden" id="password-customer-id">
+
+                <div class="form-group">
+                    <label for="new-password-input">New Password</label>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <input type="text" id="new-password-input" required style="flex: 1;" placeholder="Enter password (min 8 characters)">
+                        <button type="button" onclick="generatePassword()" class="btn btn-secondary" style="white-space: nowrap;">
+                            🎲 Generate
+                        </button>
+                    </div>
+                    <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.5rem; display: block;">
+                        The customer will use this to log in at <strong style="color: #06b6d4;">app.deskringer.com</strong>
+                    </small>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" onclick="closePasswordModal()" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="set-password-btn">
+                        Save Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
@@ -220,6 +265,9 @@
                                         <td>
                                             <button onclick="editCustomer(${customer.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">
                                                 Edit
+                                            </button>
+                                            <button onclick="openSetPasswordModal(${customer.id}, '${customer.business_name}', '${customer.email}')" class="btn btn-primary" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">
+                                                🔑 Set Password
                                             </button>
                                             <button onclick="getPaymentLink(${customer.id})" class="btn btn-primary" style="padding: 0.5rem 1rem;">
                                                 💳 Payment Link
@@ -355,6 +403,81 @@
             };
             return badges[status] || 'badge-info';
         }
+
+        // Password Modal Functions
+        function openSetPasswordModal(customerId, businessName, email) {
+            document.getElementById('password-customer-id').value = customerId;
+            document.getElementById('password-business-name').textContent = businessName;
+            document.getElementById('password-email').textContent = email;
+            document.getElementById('new-password-input').value = '';
+            document.getElementById('password-message').style.display = 'none';
+            document.getElementById('password-modal').classList.add('active');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.remove('active');
+            document.getElementById('password-form').reset();
+        }
+
+        function generatePassword() {
+            // Generate a random 12-character password
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('new-password-input').value = password;
+
+            // Select the password so user can easily copy it
+            document.getElementById('new-password-input').select();
+        }
+
+        // Handle password form submission
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const customerId = document.getElementById('password-customer-id').value;
+            const password = document.getElementById('new-password-input').value;
+            const messageDiv = document.getElementById('password-message');
+            const submitBtn = document.getElementById('set-password-btn');
+
+            messageDiv.style.display = 'none';
+
+            if (password.length < 8) {
+                messageDiv.textContent = 'Password must be at least 8 characters';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#7f1d1d';
+                messageDiv.style.color = '#fca5a5';
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Setting Password...';
+
+                await CustomerAPI.setPassword(customerId, password);
+
+                messageDiv.textContent = '✓ Password set successfully! Customer can now log in at app.deskringer.com';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#14532d';
+                messageDiv.style.color = '#86efac';
+
+                // Keep modal open so they can copy the password
+                setTimeout(() => {
+                    closePasswordModal();
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error setting password:', error);
+                messageDiv.textContent = error.message || 'Failed to set password';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#7f1d1d';
+                messageDiv.style.color = '#fca5a5';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Password';
+            }
+        });
 
         // Load page on load
         loadPage();

@@ -142,8 +142,8 @@
                 // Redirect to dashboard
                 window.location.href = '/dashboard.html';
             } catch (error) {
-                // Show error
-                errorMessage.textContent = error.message || 'Invalid email or password';
+                // Show error - use friendly message instead of technical error
+                errorMessage.textContent = 'Incorrect email or password. Please try again.';
                 errorMessage.classList.add('show');
 
                 // Reset button

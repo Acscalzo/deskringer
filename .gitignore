@@ -36,3 +36,8 @@ npm-debug.log*
 
 # Optional: Ignore node_modules if you add npm later
 node_modules/
+
+# Claude documentation (local only, not committed)
+SESSION_SUMMARY.md
+QUICK_START.md
+CLAUDE_CODE_PROMPT.md

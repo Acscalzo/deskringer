@@ -263,15 +263,17 @@
                                         <td><span class="badge ${getStatusBadge(customer.subscription_status)}">${customer.subscription_status}</span></td>
                                         <td>${formatDate(customer.created_at)}</td>
                                         <td>
-                                            <button onclick="editCustomer(${customer.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">
-                                                Edit
-                                            </button>
-                                            <button onclick="openSetPasswordModal(${customer.id}, '${customer.business_name}', '${customer.email}')" class="btn btn-primary" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">
-                                                🔑 Set Password
-                                            </button>
-                                            <button onclick="getPaymentLink(${customer.id})" class="btn btn-primary" style="padding: 0.5rem 1rem;">
-                                                💳 Payment Link
-                                            </button>
+                                            <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px;">
+                                                <button onclick="editCustomer(${customer.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem; width: 100%;">
+                                                    Edit Info
+                                                </button>
+                                                <button onclick='openSetPasswordModal(${customer.id}, ${JSON.stringify(customer.business_name)}, ${JSON.stringify(customer.email)})' class="btn btn-primary" style="padding: 0.5rem 1rem; width: 100%;">
+                                                    🔑 Set Password
+                                                </button>
+                                                <button onclick="getPaymentLink(${customer.id})" class="btn" style="padding: 0.5rem 1rem; width: 100%; background: #7c3aed; color: white;">
+                                                    💳 Payment Link
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 `).join('')}

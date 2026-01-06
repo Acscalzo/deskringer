@@ -31,108 +31,132 @@
 
     <!-- Main Content -->
     <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
-        <div class="fade-in">
-            <h1 style="margin-bottom: 2rem; font-size: 2rem;">Settings</h1>
+        <div class="fade-in" style="max-width: 900px; margin: 0 auto;">
+            <div style="margin-bottom: 3rem;">
+                <h1 style="font-size: 2rem; margin-bottom: 0.5rem; color: #f1f5f9;">Settings</h1>
+                <p style="color: #94a3b8; font-size: 0.95rem;">Manage your business information and AI configuration</p>
+            </div>
 
             <!-- Business Information Card -->
-            <div class="card" style="margin-bottom: 2rem;">
-                <h2 style="margin-bottom: 1.5rem;">Business Information</h2>
-
-                <div id="settings-message" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
-
-                <form id="settings-form" style="display: grid; gap: 1.5rem;">
+            <div class="card settings-card">
+                <div class="settings-card-header">
+                    <div class="settings-card-icon">🏢</div>
                     <div>
-                        <label for="business-name-input" class="form-label">Business Name</label>
-                        <input type="text" id="business-name-input" name="business_name" required class="form-input">
+                        <h2 style="margin: 0; font-size: 1.25rem; color: #f1f5f9;">Business Information</h2>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #94a3b8;">Update your company details</p>
+                    </div>
+                </div>
+
+                <div id="settings-message" class="alert" style="display: none;"></div>
+
+                <form id="settings-form">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="business-name-input" class="form-label">Business Name *</label>
+                            <input type="text" id="business-name-input" name="business_name" required class="form-input">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="business-type" class="form-label">Business Type</label>
+                            <select id="business-type" name="business_type" class="form-input">
+                                <option value="">Select type...</option>
+                                <option value="salon">Salon/Barbershop</option>
+                                <option value="dental">Dental Office</option>
+                                <option value="medical">Medical Practice</option>
+                                <option value="gym">Gym/Fitness</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="retail">Retail</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="contact-name" class="form-label">Contact Name</label>
+                            <input type="text" id="contact-name" name="contact_name" class="form-input">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="+1 (555) 123-4567">
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="contact-name" class="form-label">Contact Name</label>
-                        <input type="text" id="contact-name" name="contact_name" class="form-input">
+                    <div class="form-divider"></div>
+
+                    <div class="form-section-header">
+                        <h3 style="margin: 0; font-size: 1rem; color: #f1f5f9;">🤖 AI Configuration</h3>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #94a3b8;">Customize how your AI receptionist responds</p>
                     </div>
 
-                    <div>
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" class="form-input">
-                    </div>
-
-                    <div>
-                        <label for="business-type" class="form-label">Business Type</label>
-                        <select id="business-type" name="business_type" class="form-input">
-                            <option value="">Select type...</option>
-                            <option value="salon">Salon/Barbershop</option>
-                            <option value="dental">Dental Office</option>
-                            <option value="medical">Medical Practice</option>
-                            <option value="gym">Gym/Fitness</option>
-                            <option value="restaurant">Restaurant</option>
-                            <option value="retail">Retail</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    <div>
+                    <div class="form-field">
                         <label for="greeting-message" class="form-label">Greeting Message</label>
                         <textarea id="greeting-message" name="greeting_message" rows="3" class="form-input"
-                                  placeholder="Thank you for calling..."></textarea>
-                        <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.25rem; display: block;">
-                            What should the AI say when someone calls?
-                        </small>
+                                  placeholder="Thank you for calling [Your Business]. How can I help you today?"></textarea>
+                        <small class="form-help">The first thing callers will hear when the AI answers</small>
                     </div>
 
-                    <div>
+                    <div class="form-field">
                         <label for="ai-instructions" class="form-label">AI Instructions</label>
-                        <textarea id="ai-instructions" name="ai_instructions" rows="4" class="form-input"
-                                  placeholder="Be friendly and helpful. Take messages for appointments..."></textarea>
-                        <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.25rem; display: block;">
-                            Special instructions for how the AI should handle calls
-                        </small>
+                        <textarea id="ai-instructions" name="ai_instructions" rows="5" class="form-input"
+                                  placeholder="Be friendly and professional. Our business hours are Mon-Fri 9am-5pm. Take detailed messages with name, phone, and reason for calling..."></textarea>
+                        <small class="form-help">Detailed instructions on how the AI should behave, what questions to ask, and how to handle different scenarios</small>
                     </div>
 
-                    <div>
-                        <button type="submit" class="btn btn-primary" id="save-settings-btn">
-                            Save Changes
+                    <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary" id="save-settings-btn" style="min-width: 150px;">
+                            💾 Save Changes
                         </button>
                     </div>
                 </form>
             </div>
 
             <!-- DeskRinger Number Card -->
-            <div class="card" style="margin-bottom: 2rem;">
-                <h2 style="margin-bottom: 1rem;">Your DeskRinger Number</h2>
-                <div style="background: #1e293b; padding: 1.5rem; border-radius: 8px; text-align: center;">
-                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Customers call this number:</div>
-                    <div id="deskringer-number" style="font-size: 2rem; font-weight: 700; color: #06b6d4; letter-spacing: 0.05em;">
-                        Loading...
+            <div class="card settings-card">
+                <div class="settings-card-header">
+                    <div class="settings-card-icon">📞</div>
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.25rem; color: #f1f5f9;">Your DeskRinger Number</h2>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #94a3b8;">This is the number customers call to reach your AI receptionist</p>
                     </div>
+                </div>
+                <div class="deskringer-number-display">
+                    <div id="deskringer-number" class="deskringer-number">Loading...</div>
+                    <p style="color: #64748b; font-size: 0.875rem; margin: 1rem 0 0 0;">Forward this number to customers or use it for your business listings</p>
                 </div>
             </div>
 
             <!-- Change Password Card -->
-            <div class="card">
-                <h2 style="margin-bottom: 1.5rem;">Change Password</h2>
-
-                <div id="password-message" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
-
-                <form id="change-password-form" style="display: grid; gap: 1.5rem; max-width: 500px;">
+            <div class="card settings-card">
+                <div class="settings-card-header">
+                    <div class="settings-card-icon">🔐</div>
                     <div>
+                        <h2 style="margin: 0; font-size: 1.25rem; color: #f1f5f9;">Change Password</h2>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #94a3b8;">Update your portal login password</p>
+                    </div>
+                </div>
+
+                <div id="password-message" class="alert" style="display: none;"></div>
+
+                <form id="change-password-form" style="max-width: 500px;">
+                    <div class="form-field">
                         <label for="current-password" class="form-label">Current Password</label>
                         <input type="password" id="current-password" name="current-password" required class="form-input">
                     </div>
 
-                    <div>
+                    <div class="form-field">
                         <label for="new-password" class="form-label">New Password</label>
                         <input type="password" id="new-password" name="new-password" required class="form-input">
-                        <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.25rem; display: block;">Minimum 8 characters</small>
+                        <small class="form-help">Minimum 8 characters</small>
                     </div>
 
-                    <div>
+                    <div class="form-field">
                         <label for="confirm-password" class="form-label">Confirm New Password</label>
                         <input type="password" id="confirm-password" name="confirm-password" required class="form-input">
                     </div>
 
-                    <div>
-                        <button type="submit" class="btn btn-primary" id="change-password-btn">
-                            Change Password
+                    <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary" id="change-password-btn" style="min-width: 150px;">
+                            🔑 Change Password
                         </button>
                     </div>
                 </form>
@@ -266,32 +290,154 @@
     </script>
 
     <style>
+        .settings-card {
+            margin-bottom: 2rem;
+            border: 1px solid #1e293b;
+            transition: all 0.2s;
+        }
+
+        .settings-card:hover {
+            border-color: #334155;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .settings-card-header {
+            display: flex;
+            gap: 1rem;
+            align-items: start;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #1e293b;
+            margin-bottom: 2rem;
+        }
+
+        .settings-card-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-field {
+            margin-bottom: 1.5rem;
+        }
+
         .form-label {
             display: block;
-            color: #94a3b8;
+            color: #e2e8f0;
             font-size: 0.875rem;
             margin-bottom: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.01em;
         }
 
         .form-input {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.875rem 1rem;
             border-radius: 8px;
-            border: 1px solid #475569;
-            background: #334155;
+            border: 2px solid #334155;
+            background: #1e293b;
             color: #f1f5f9;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input:hover {
+            border-color: #475569;
+            background: #233044;
         }
 
         .form-input:focus {
             outline: none;
             border-color: #06b6d4;
+            background: #1e293b;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #64748b;
         }
 
         textarea.form-input {
             resize: vertical;
+            line-height: 1.6;
+        }
+
+        select.form-input {
+            cursor: pointer;
+        }
+
+        .form-help {
+            display: block;
+            color: #64748b;
+            font-size: 0.8125rem;
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .form-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #334155, transparent);
+            margin: 2rem 0;
+        }
+
+        .form-section-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            border-left: 4px solid;
+        }
+
+        .deskringer-number-display {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        .deskringer-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #06b6d4;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Button enhancement */
+        .btn-primary {
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
     </style>
 </body>

@@ -232,6 +232,10 @@ def twilio_status_webhook():
                 # Generate summary of the call
                 summary = notification_service.generate_summary(call.customer, call)
 
+                # Save summary to call record for customer portal
+                call.summary = summary
+                db.session.commit()
+
                 # Send email and/or SMS notification
                 notification_service.send_call_notification(call.customer, call, summary)
 

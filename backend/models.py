@@ -168,6 +168,8 @@ class Call(db.Model):
             'summary': self.summary,
             'intent': self.intent,
             'callback_requested': self.callback_requested,
+            'handled': self.handled,
+            'handled_at': self.handled_at.isoformat() if self.handled_at else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'ended_at': self.ended_at.isoformat() if self.ended_at else None
         }

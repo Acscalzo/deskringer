@@ -1,8 +1,5 @@
 [build]
-  # Only rebuild when admin-site folder changes (saves build minutes)
-  # Exit 0 = do build, Exit 1 = skip build
-  # Invert git diff result: no changes (0) -> skip (1), has changes (1) -> build (0)
-  ignore = "bash -c '! git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF admin-site/'"
+  publish = "."
 
 [[redirects]]
   from = "/*"

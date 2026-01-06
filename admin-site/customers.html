@@ -207,6 +207,14 @@
 
         let currentCustomerId = null;
 
+        // Helper function to escape HTML attributes
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Load admin info and customers
         async function loadPage() {
             try {
@@ -267,7 +275,7 @@
                                                 <button onclick="editCustomer(${customer.id})" class="btn btn-secondary" style="padding: 0.5rem 1rem; width: 100%;">
                                                     Edit Info
                                                 </button>
-                                                <button onclick='openSetPasswordModal(${customer.id}, ${JSON.stringify(customer.business_name)}, ${JSON.stringify(customer.email)})' class="btn btn-primary" style="padding: 0.5rem 1rem; width: 100%;">
+                                                <button class="btn btn-primary set-password-btn" data-customer-id="${customer.id}" data-business-name="${escapeHtml(customer.business_name)}" data-email="${escapeHtml(customer.email)}" style="padding: 0.5rem 1rem; width: 100%;">
                                                     🔑 Set Password
                                                 </button>
                                                 <button onclick="getPaymentLink(${customer.id})" class="btn" style="padding: 0.5rem 1rem; width: 100%; background: #7c3aed; color: white;">
@@ -281,6 +289,9 @@
                         </table>
                     </div>
                 `;
+
+                // Set up event delegation for Set Password buttons
+                setupPasswordButtonHandlers();
             } catch (error) {
                 container.innerHTML = `
                     <p style="text-align: center; color: #ef4444; padding: 2rem;">
@@ -288,6 +299,27 @@
                     </p>
                 `;
             }
+        }
+
+        // Set up event delegation for Set Password buttons
+        function setupPasswordButtonHandlers() {
+            // Remove old listeners if any
+            const container = document.getElementById('customers-container');
+            const oldButtons = container.querySelectorAll('.set-password-btn');
+            oldButtons.forEach(btn => {
+                btn.replaceWith(btn.cloneNode(true)); // Remove all event listeners
+            });
+
+            // Add new listeners
+            container.addEventListener('click', (e) => {
+                if (e.target.classList.contains('set-password-btn') || e.target.closest('.set-password-btn')) {
+                    const btn = e.target.classList.contains('set-password-btn') ? e.target : e.target.closest('.set-password-btn');
+                    const customerId = btn.dataset.customerId;
+                    const businessName = btn.dataset.businessName;
+                    const email = btn.dataset.email;
+                    openSetPasswordModal(customerId, businessName, email);
+                }
+            });
         }
 
         function openAddCustomerModal() {

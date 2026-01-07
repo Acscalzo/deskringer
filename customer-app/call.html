@@ -32,10 +32,15 @@
     <!-- Main Content -->
     <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
         <div class="fade-in">
-            <!-- Back Button -->
-            <button onclick="window.location.href='/dashboard.html'" class="btn btn-secondary" style="margin-bottom: 1.5rem;">
-                ← Back to Calls
-            </button>
+            <!-- Back Button and Live Indicator -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <button onclick="window.location.href='/dashboard.html'" class="btn btn-secondary">
+                    ← Back to Calls
+                </button>
+                <div id="live-indicator" style="display: none; padding: 0.5rem 1rem; background: #0891b2; color: white; border-radius: 8px; font-size: 0.875rem; font-weight: 600; animation: pulse 2s infinite;">
+                    🔴 Live Updates
+                </div>
+            </div>
 
             <!-- Call Details -->
             <div id="call-details">
@@ -54,6 +59,7 @@
         // Get call ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const callId = urlParams.get('id');
+        let refreshInterval = null;
 
         if (!callId) {
             window.location.href = '/dashboard.html';
@@ -68,6 +74,24 @@
                 // Load call details
                 const call = await CallAPI.getById(callId);
                 renderCallDetails(call);
+
+                // Set up live refresh if call is in progress
+                const liveIndicator = document.getElementById('live-indicator');
+                if (call.status === 'in_progress') {
+                    if (!refreshInterval) {
+                        console.log('Call is in progress - enabling live updates');
+                        refreshInterval = setInterval(loadCallDetails, 3000); // Refresh every 3 seconds
+                        if (liveIndicator) liveIndicator.style.display = 'block';
+                    }
+                } else {
+                    // Clear interval if call is no longer in progress
+                    if (refreshInterval) {
+                        console.log('Call completed - disabling live updates');
+                        clearInterval(refreshInterval);
+                        refreshInterval = null;
+                        if (liveIndicator) liveIndicator.style.display = 'none';
+                    }
+                }
 
             } catch (error) {
                 console.error('Error loading call details:', error);
@@ -87,6 +111,13 @@
             }
         }
 
+        // Clean up interval when leaving page
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+
         function renderCallDetails(call) {
             const container = document.getElementById('call-details');
 
@@ -95,11 +126,14 @@
                 <div class="card" style="margin-bottom: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
                         <div>
-                            <h1 style="font-size: 1.75rem; margin-bottom: 0.75rem; color: #e2e8f0;">Call from ${call.caller_phone}</h1>
+                            <h1 style="font-size: 1.75rem; margin-bottom: 0.75rem; color: var(--text-primary);">Call from ${call.caller_phone}</h1>
                             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                ${call.status === 'in_progress' ? '<span class="badge" style="background: #0891b2; color: white; animation: pulse 2s infinite;">🔴 In Progress</span>' : ''}
+                                ${call.status === 'completed' ? '<span class="badge" style="background: #059669; color: white;">Completed</span>' : ''}
+                                ${call.status === 'failed' ? '<span class="badge" style="background: #dc2626; color: white;">Failed</span>' : ''}
+                                ${call.status === 'no_answer' ? '<span class="badge" style="background: #64748b; color: white;">No Answer</span>' : ''}
                                 ${call.handled ? '<span class="badge badge-success">Handled</span>' : '<span class="badge badge-warning">Needs Attention</span>'}
-                                ${call.callback_requested ? '<span class="badge" style="background: #7c3aed;">Callback Requested</span>' : ''}
-                                <span class="badge">${call.status || 'Unknown'}</span>
+                                ${call.callback_requested ? '<span class="badge" style="background: #7c3aed; color: white;">Callback Requested</span>' : ''}
                             </div>
                         </div>
                         <button id="toggle-handled-btn" class="btn ${call.handled ? 'btn-secondary' : 'btn-primary'}"
@@ -187,7 +221,8 @@
 
         function formatFullDateTime(isoString) {
             if (!isoString) return '';
-            const date = new Date(isoString);
+            // Parse the UTC date string and convert to local time
+            const date = new Date(isoString + (isoString.endsWith('Z') ? '' : 'Z'));
             return date.toLocaleString('en-US', {
                 month: 'long',
                 day: 'numeric',
@@ -200,7 +235,8 @@
 
         function formatTime(isoString) {
             if (!isoString) return '';
-            const date = new Date(isoString);
+            // Parse the UTC date string and convert to local time
+            const date = new Date(isoString + (isoString.endsWith('Z') ? '' : 'Z'));
             return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         }
 
@@ -222,18 +258,31 @@
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
-            background: #1e293b;
-            color: #94a3b8;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
         }
 
         .badge-warning {
-            background: #78350f;
-            color: #fbbf24;
+            background: var(--warning-bg);
+            color: var(--warning-text);
+            border-color: var(--warning-text);
         }
 
         .badge-success {
-            background: #14532d;
-            color: #86efac;
+            background: var(--success-bg);
+            color: var(--success-text);
+            border-color: var(--success-text);
+        }
+
+        /* Pulse animation for in-progress calls */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
         }
     </style>
 </body>

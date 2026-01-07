@@ -190,8 +190,12 @@
                         <div style="flex: 1; cursor: pointer;" onclick="viewCall(${call.id})">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
                                 <div style="flex: 1;">
-                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
                                         <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">${call.caller_phone}</span>
+                                        ${call.status === 'in_progress' ? '<span class="badge" style="background: #0891b2; color: white;">In Progress</span>' : ''}
+                                        ${call.status === 'completed' ? '<span class="badge" style="background: #059669; color: white;">Completed</span>' : ''}
+                                        ${call.status === 'failed' ? '<span class="badge" style="background: #dc2626; color: white;">Failed</span>' : ''}
+                                        ${call.status === 'no_answer' ? '<span class="badge" style="background: #64748b; color: white;">No Answer</span>' : ''}
                                         ${call.handled ? '<span class="badge badge-success">Handled</span>' : '<span class="badge badge-warning">Needs Attention</span>'}
                                         ${call.callback_requested ? '<span class="badge" style="background: #7c3aed; color: white;">Callback Requested</span>' : ''}
                                     </div>
@@ -247,7 +251,8 @@
 
         function formatDateTime(isoString) {
             if (!isoString) return '';
-            const date = new Date(isoString);
+            // Parse the UTC date string and convert to local time
+            const date = new Date(isoString + (isoString.endsWith('Z') ? '' : 'Z'));
             const now = new Date();
             const diff = now - date;
             const hours = diff / (1000 * 60 * 60);

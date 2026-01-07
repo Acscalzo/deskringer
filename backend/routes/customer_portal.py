@@ -187,6 +187,10 @@ def update_customer_settings():
         customer.business_type = data['business_type']
     if 'business_hours' in data:
         customer.business_hours = data['business_hours']
+    if 'holiday_hours' in data:
+        customer.holiday_hours = data['holiday_hours']
+    if 'forward_to_number' in data:
+        customer.forward_to_number = data['forward_to_number']
     if 'greeting_message' in data:
         customer.greeting_message = data['greeting_message']
 

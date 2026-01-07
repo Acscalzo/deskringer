@@ -45,7 +45,8 @@ class Customer(db.Model):
 
     # Business details
     business_type = db.Column(db.String(50))  # salon, dental, gym, etc.
-    business_hours = db.Column(db.JSON)  # Store hours as JSON
+    business_hours = db.Column(db.JSON)  # Store hours as JSON: {monday: {open: "9:00", close: "17:00"}, ...}
+    holiday_hours = db.Column(db.Text)  # Special holiday hours information
 
     # DeskRinger phone number assigned to this customer
     deskringer_number = db.Column(db.String(20), unique=True, index=True)
@@ -110,7 +111,20 @@ class Customer(db.Model):
 
         # Business hours
         if self.business_hours:
-            instructions.append(f"\nBusiness Hours: {self.business_hours}")
+            hours_text = "\nBusiness Hours:"
+            days_order = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            for day in days_order:
+                if day in self.business_hours:
+                    day_info = self.business_hours[day]
+                    if day_info.get('closed'):
+                        hours_text += f"\n{day.capitalize()}: Closed"
+                    elif day_info.get('open') and day_info.get('close'):
+                        hours_text += f"\n{day.capitalize()}: {day_info['open']} - {day_info['close']}"
+            instructions.append(hours_text)
+
+        # Holiday hours
+        if self.holiday_hours:
+            instructions.append(f"\nHoliday Hours:\n{self.holiday_hours}")
 
         # FAQs
         if self.faqs and len(self.faqs) > 0:
@@ -159,12 +173,19 @@ Inform the caller of our business hours and ask them to call back during those t
         if self.special_instructions:
             instructions.append(f"\nSpecial Instructions:\n{self.special_instructions}")
 
+        # Transfer/Forward number
+        if self.forward_to_number:
+            instructions.append(f"""
+Call Transfer:
+If a caller asks to speak with someone directly, or if you cannot answer their question, you can transfer them to: {self.forward_to_number}
+Always ask the caller if they would like to be transferred before doing so.""")
+
         # General behavior
         instructions.append("""
 General Behavior:
 - Be professional, friendly, and helpful
 - Speak clearly and naturally
-- If you don't know an answer, it's okay to say you'll have someone call them back with that information
+- If you don't know an answer, offer to transfer them to a staff member or have someone call them back
 - Always thank the caller for calling""")
 
         return "\n".join(instructions)
@@ -178,6 +199,7 @@ General Behavior:
             'phone': self.phone,
             'business_type': self.business_type,
             'business_hours': self.business_hours,
+            'holiday_hours': self.holiday_hours,
             'deskringer_number': self.deskringer_number,
             'forward_to_number': self.forward_to_number,
             'greeting_message': self.greeting_message,

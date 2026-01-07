@@ -84,6 +84,37 @@
                     <div class="form-divider"></div>
 
                     <div class="form-section-header">
+                        <h3 style="margin: 0; font-size: 1rem;">🕐 Business Hours</h3>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Set your operating hours for each day</p>
+                    </div>
+
+                    <div id="business-hours-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <!-- Business hours will be dynamically added here -->
+                    </div>
+
+                    <div class="form-field" style="margin-top: 1rem;">
+                        <label for="holiday-hours" class="form-label">Holiday Hours (Optional)</label>
+                        <textarea id="holiday-hours" name="holiday_hours" rows="3" class="form-input"
+                                  placeholder="e.g., Closed on Thanksgiving and Christmas. Open 10am-3pm on New Year's Day."></textarea>
+                        <small class="form-help">Specify if you're open on holidays and any special hours</small>
+                    </div>
+
+                    <div class="form-divider"></div>
+
+                    <div class="form-section-header">
+                        <h3 style="margin: 0; font-size: 1rem;">📞 Call Transfer</h3>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Where should callers be transferred if needed?</p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="forward-to-number" class="form-label">Transfer Phone Number *</label>
+                        <input type="tel" id="forward-to-number" name="forward_to_number" class="form-input" placeholder="+1 (555) 123-4567" required>
+                        <small class="form-help">The AI will transfer callers to this number if they request to speak with someone or if the AI can't answer their question</small>
+                    </div>
+
+                    <div class="form-divider"></div>
+
+                    <div class="form-section-header">
                         <h3 style="margin: 0; font-size: 1rem;">🤖 AI Configuration</h3>
                         <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Customize how your AI receptionist responds</p>
                     </div>
@@ -224,6 +255,15 @@
 
         let customerData = null;
         let faqs = [];
+        let businessHours = {
+            monday: { open: '09:00', close: '17:00', closed: false },
+            tuesday: { open: '09:00', close: '17:00', closed: false },
+            wednesday: { open: '09:00', close: '17:00', closed: false },
+            thursday: { open: '09:00', close: '17:00', closed: false },
+            friday: { open: '09:00', close: '17:00', closed: false },
+            saturday: { open: '09:00', close: '17:00', closed: true },
+            sunday: { open: '09:00', close: '17:00', closed: true }
+        };
 
         // Load customer data
         async function loadCustomerData() {
@@ -237,6 +277,14 @@
                 document.getElementById('phone').value = customerData.phone || '';
                 document.getElementById('business-type').value = customerData.business_type || '';
                 document.getElementById('deskringer-number').textContent = customerData.deskringer_number || 'Not assigned';
+
+                // Business hours and transfer
+                if (customerData.business_hours) {
+                    businessHours = customerData.business_hours;
+                }
+                renderBusinessHours();
+                document.getElementById('holiday-hours').value = customerData.holiday_hours || '';
+                document.getElementById('forward-to-number').value = customerData.forward_to_number || '';
 
                 // Populate form - AI config
                 document.getElementById('greeting-message').value = customerData.greeting_message || '';
@@ -259,6 +307,51 @@
                     logout();
                 }
             }
+        }
+
+        // Business Hours Management
+        function renderBusinessHours() {
+            const container = document.getElementById('business-hours-container');
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+            container.innerHTML = days.map(day => {
+                const hours = businessHours[day] || { open: '09:00', close: '17:00', closed: false };
+                return `
+                    <div class="hours-row">
+                        <div class="hours-day">${day.charAt(0).toUpperCase() + day.slice(1)}</div>
+                        <label class="hours-checkbox">
+                            <input type="checkbox" ${hours.closed ? 'checked' : ''}
+                                   onchange="toggleDayClosed('${day}', this.checked)">
+                            <span>Closed</span>
+                        </label>
+                        <div class="hours-times" ${hours.closed ? 'style="opacity: 0.4; pointer-events: none;"' : ''} id="${day}-times">
+                            <input type="time" class="form-input" style="padding: 0.5rem 0.75rem;"
+                                   value="${hours.open || '09:00'}"
+                                   onchange="updateHours('${day}', 'open', this.value)">
+                            <span style="color: var(--text-tertiary); font-weight: 600;">to</span>
+                            <input type="time" class="form-input" style="padding: 0.5rem 0.75rem;"
+                                   value="${hours.close || '17:00'}"
+                                   onchange="updateHours('${day}', 'close', this.value)">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleDayClosed(day, isClosed) {
+            businessHours[day].closed = isClosed;
+            const timesDiv = document.getElementById(`${day}-times`);
+            if (isClosed) {
+                timesDiv.style.opacity = '0.4';
+                timesDiv.style.pointerEvents = 'none';
+            } else {
+                timesDiv.style.opacity = '1';
+                timesDiv.style.pointerEvents = 'auto';
+            }
+        }
+
+        function updateHours(day, field, value) {
+            businessHours[day][field] = value;
         }
 
         // FAQ Management
@@ -302,8 +395,9 @@
             const formData = new FormData(e.target);
             const settings = Object.fromEntries(formData.entries());
 
-            // Add FAQs to settings
+            // Add structured data
             settings.faqs = faqs;
+            settings.business_hours = businessHours;
 
             const messageDiv = document.getElementById('settings-message');
             const submitBtn = document.getElementById('save-settings-btn');
@@ -589,6 +683,51 @@
             color: var(--text-secondary);
             font-size: 0.9375rem;
             line-height: 1.5;
+        }
+
+        /* Business hours styling */
+        .hours-row {
+            display: grid;
+            grid-template-columns: 120px 120px 1fr;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+        }
+
+        .hours-day {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .hours-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .hours-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .hours-times {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: opacity 0.2s;
+        }
+
+        .hours-times input[type="time"] {
+            flex: 1;
+            max-width: 140px;
         }
     </style>
 </body>

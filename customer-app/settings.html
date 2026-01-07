@@ -96,10 +96,61 @@
                     </div>
 
                     <div class="form-field">
-                        <label for="ai-instructions" class="form-label">AI Instructions</label>
-                        <textarea id="ai-instructions" name="ai_instructions" rows="5" class="form-input"
-                                  placeholder="Be friendly and professional. Our business hours are Mon-Fri 9am-5pm. Take detailed messages with name, phone, and reason for calling..."></textarea>
-                        <small class="form-help">Detailed instructions on how the AI should behave, what questions to ask, and how to handle different scenarios</small>
+                        <label for="services-offered" class="form-label">Services Offered</label>
+                        <textarea id="services-offered" name="services_offered" rows="4" class="form-input"
+                                  placeholder="Haircuts, styling, coloring, highlights, special event styling"></textarea>
+                        <small class="form-help">List the services your business provides (one per line or comma-separated)</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Appointment/Request Handling</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+                            <label class="radio-option">
+                                <input type="radio" name="appointment_handling" value="collect_details" checked>
+                                <span><strong>Collect caller details</strong> - Get name, phone, requested time, delivery address (if applicable), and description of needs</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="appointment_handling" value="callback">
+                                <span><strong>Take info for callback</strong> - Get name and phone, promise someone will call back</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="appointment_handling" value="transfer">
+                                <span><strong>Transfer to staff</strong> - Connect caller to staff member immediately</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="appointment_handling" value="booking_link">
+                                <span><strong>Provide booking link</strong> - Share online booking website or instructions</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="appointment_handling" value="call_back_later">
+                                <span><strong>Call back during hours</strong> - Ask them to call back during business hours</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="pricing-info" class="form-label">Pricing Information (Optional)</label>
+                        <textarea id="pricing-info" name="pricing_info" rows="3" class="form-input"
+                                  placeholder="Haircuts start at $45, coloring starts at $85"></textarea>
+                        <small class="form-help">Should the AI share pricing? If yes, provide the details here</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Common Questions & Answers</label>
+                        <div id="faqs-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <!-- FAQs will be dynamically added here -->
+                        </div>
+                        <button type="button" onclick="addFAQ()" class="btn btn-secondary" style="margin-top: 0.75rem;">
+                            + Add Question & Answer
+                        </button>
+                        <small class="form-help">Pre-programmed answers to questions callers frequently ask</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="special-instructions" class="form-label">Additional Instructions (Optional)</label>
+                        <textarea id="special-instructions" name="special_instructions" rows="4" class="form-input"
+                                  placeholder="Emergency protocols, specific staff to mention, holiday hours, etc."></textarea>
+                        <small class="form-help">Any other specific instructions or information for the AI</small>
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
@@ -172,6 +223,7 @@
         requireAuth();
 
         let customerData = null;
+        let faqs = [];
 
         // Load customer data
         async function loadCustomerData() {
@@ -179,14 +231,27 @@
                 customerData = await CustomerAPI.getMe();
                 document.getElementById('business-name').textContent = customerData.business_name;
 
-                // Populate form
+                // Populate form - Business info
                 document.getElementById('business-name-input').value = customerData.business_name || '';
                 document.getElementById('contact-name').value = customerData.contact_name || '';
                 document.getElementById('phone').value = customerData.phone || '';
                 document.getElementById('business-type').value = customerData.business_type || '';
-                document.getElementById('greeting-message').value = customerData.greeting_message || '';
-                document.getElementById('ai-instructions').value = customerData.ai_instructions || '';
                 document.getElementById('deskringer-number').textContent = customerData.deskringer_number || 'Not assigned';
+
+                // Populate form - AI config
+                document.getElementById('greeting-message').value = customerData.greeting_message || '';
+                document.getElementById('services-offered').value = customerData.services_offered || '';
+                document.getElementById('pricing-info').value = customerData.pricing_info || '';
+                document.getElementById('special-instructions').value = customerData.special_instructions || '';
+
+                // Set appointment handling radio
+                const appointmentHandling = customerData.appointment_handling || 'collect_details';
+                const radio = document.querySelector(`input[name="appointment_handling"][value="${appointmentHandling}"]`);
+                if (radio) radio.checked = true;
+
+                // Load FAQs
+                faqs = customerData.faqs || [];
+                renderFAQs();
 
             } catch (error) {
                 console.error('Error loading customer data:', error);
@@ -196,12 +261,50 @@
             }
         }
 
+        // FAQ Management
+        function renderFAQs() {
+            const container = document.getElementById('faqs-container');
+            if (faqs.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-tertiary); font-size: 0.875rem; font-style: italic;">No questions added yet. Click "Add Question & Answer" below to get started.</p>';
+                return;
+            }
+
+            container.innerHTML = faqs.map((faq, index) => `
+                <div class="faq-item" style="border: 2px solid var(--border-color); border-radius: 8px; padding: 1rem; background: var(--bg-tertiary);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 0.75rem;">
+                        <strong style="color: var(--text-primary);">Q&A #${index + 1}</strong>
+                        <button type="button" onclick="removeFAQ(${index})" class="btn btn-sm" style="background: #dc2626; color: white; padding: 0.25rem 0.75rem;">Remove</button>
+                    </div>
+                    <input type="text" class="form-input" style="margin-bottom: 0.75rem;" placeholder="Question (e.g., Do you take walk-ins?)" value="${faq.question || ''}" onchange="updateFAQ(${index}, 'question', this.value)">
+                    <textarea class="form-input" rows="2" placeholder="Answer (e.g., Yes, we accept walk-ins based on availability)" onchange="updateFAQ(${index}, 'answer', this.value)">${faq.answer || ''}</textarea>
+                </div>
+            `).join('');
+        }
+
+        function addFAQ() {
+            faqs.push({ question: '', answer: '' });
+            renderFAQs();
+        }
+
+        function removeFAQ(index) {
+            faqs.splice(index, 1);
+            renderFAQs();
+        }
+
+        function updateFAQ(index, field, value) {
+            faqs[index][field] = value;
+        }
+
         // Handle settings form submission
         document.getElementById('settings-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const formData = new FormData(e.target);
             const settings = Object.fromEntries(formData.entries());
+
+            // Add FAQs to settings
+            settings.faqs = faqs;
+
             const messageDiv = document.getElementById('settings-message');
             const submitBtn = document.getElementById('save-settings-btn');
 
@@ -213,7 +316,7 @@
 
                 await CustomerAPI.updateSettings(settings);
 
-                messageDiv.textContent = 'Settings saved successfully!';
+                messageDiv.textContent = 'Settings saved successfully! Your AI receptionist has been updated.';
                 messageDiv.style.display = 'block';
                 messageDiv.style.background = '#14532d';
                 messageDiv.style.color = '#86efac';
@@ -229,7 +332,7 @@
                 messageDiv.style.color = '#fca5a5';
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Save Changes';
+                submitBtn.textContent = '💾 Save Changes';
             }
         });
 
@@ -445,6 +548,47 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* Radio options styling */
+        .radio-option {
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .radio-option:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 0.15rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .radio-option input[type="radio"]:checked {
+            accent-color: var(--accent-primary);
+        }
+
+        .radio-option:has(input[type="radio"]:checked) {
+            border-color: var(--accent-primary);
+            background: var(--accent-light);
+        }
+
+        .radio-option span {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.5;
         }
     </style>
 </body>

@@ -189,8 +189,22 @@ def update_customer_settings():
         customer.business_hours = data['business_hours']
     if 'greeting_message' in data:
         customer.greeting_message = data['greeting_message']
-    if 'ai_instructions' in data:
-        customer.ai_instructions = data['ai_instructions']
+
+    # Structured AI configuration fields
+    if 'services_offered' in data:
+        customer.services_offered = data['services_offered']
+    if 'faqs' in data:
+        customer.faqs = data['faqs']
+    if 'appointment_handling' in data:
+        customer.appointment_handling = data['appointment_handling']
+    if 'pricing_info' in data:
+        customer.pricing_info = data['pricing_info']
+    if 'special_instructions' in data:
+        customer.special_instructions = data['special_instructions']
+
+    # Compile AI instructions from structured fields
+    customer.ai_instructions = customer.compile_ai_instructions()
+
     if 'notification_email' in data:
         customer.notification_email = data['notification_email']
     if 'notification_phone' in data:

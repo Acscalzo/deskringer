@@ -53,9 +53,16 @@ class Customer(db.Model):
     # Forwarding settings
     forward_to_number = db.Column(db.String(20))  # Customer's actual business phone
 
-    # AI Configuration
+    # AI Configuration - Structured fields for easier customization
     greeting_message = db.Column(db.Text)  # Custom greeting
-    ai_instructions = db.Column(db.Text)  # Custom instructions for AI behavior
+    services_offered = db.Column(db.Text)  # What services does the business provide?
+    faqs = db.Column(db.JSON)  # List of {question, answer} pairs
+    appointment_handling = db.Column(db.String(50), default='collect_details')  # collect_details, callback, transfer, booking_link, call_back_later
+    pricing_info = db.Column(db.Text)  # Pricing information to share
+    special_instructions = db.Column(db.Text)  # Any other specific instructions
+
+    # Compiled AI instructions (generated from above fields)
+    ai_instructions = db.Column(db.Text)  # Full compiled instructions for AI behavior
 
     # Notification Settings
     notification_email = db.Column(db.String(120))  # Where to send call notifications (defaults to email)
@@ -86,6 +93,82 @@ class Customer(db.Model):
             return False
         return check_password_hash(self.password_hash, password)
 
+    def compile_ai_instructions(self):
+        """Compile structured fields into final AI instructions"""
+        instructions = []
+
+        # Business context
+        if self.business_type:
+            instructions.append(f"Business Type: {self.business_type}")
+
+        if self.business_name:
+            instructions.append(f"Business Name: {self.business_name}")
+
+        # Services offered
+        if self.services_offered:
+            instructions.append(f"\nServices Offered:\n{self.services_offered}")
+
+        # Business hours
+        if self.business_hours:
+            instructions.append(f"\nBusiness Hours: {self.business_hours}")
+
+        # FAQs
+        if self.faqs and len(self.faqs) > 0:
+            instructions.append("\nFrequently Asked Questions:")
+            for faq in self.faqs:
+                q = faq.get('question', '')
+                a = faq.get('answer', '')
+                if q and a:
+                    instructions.append(f"Q: {q}\nA: {a}")
+
+        # Appointment/ticket handling
+        if self.appointment_handling == 'collect_details':
+            instructions.append("""
+Appointment/Request Handling:
+Collect the following information from the caller:
+- Full name
+- Phone number for callback
+- Requested appointment date/time (if scheduling an appointment)
+- Delivery address (if requesting delivery)
+- Brief description of what they need
+- Any special requests or notes
+
+After collecting information, confirm the details with the caller and let them know someone will contact them shortly to confirm.""")
+        elif self.appointment_handling == 'callback':
+            instructions.append("""
+Appointment/Request Handling:
+Take the caller's name and phone number, then let them know someone will call them back shortly to help with their request.""")
+        elif self.appointment_handling == 'transfer':
+            instructions.append("""
+Appointment/Request Handling:
+Inform the caller you'll transfer them to a staff member who can help them immediately.""")
+        elif self.appointment_handling == 'booking_link':
+            instructions.append("""
+Appointment/Request Handling:
+Provide the caller with our online booking information or website where they can schedule an appointment.""")
+        elif self.appointment_handling == 'call_back_later':
+            instructions.append("""
+Appointment/Request Handling:
+Inform the caller of our business hours and ask them to call back during those times to speak with a staff member.""")
+
+        # Pricing
+        if self.pricing_info:
+            instructions.append(f"\nPricing Information:\n{self.pricing_info}")
+
+        # Special instructions
+        if self.special_instructions:
+            instructions.append(f"\nSpecial Instructions:\n{self.special_instructions}")
+
+        # General behavior
+        instructions.append("""
+General Behavior:
+- Be professional, friendly, and helpful
+- Speak clearly and naturally
+- If you don't know an answer, it's okay to say you'll have someone call them back with that information
+- Always thank the caller for calling""")
+
+        return "\n".join(instructions)
+
     def to_dict(self, include_calls=False):
         data = {
             'id': self.id,
@@ -98,6 +181,11 @@ class Customer(db.Model):
             'deskringer_number': self.deskringer_number,
             'forward_to_number': self.forward_to_number,
             'greeting_message': self.greeting_message,
+            'services_offered': self.services_offered,
+            'faqs': self.faqs or [],
+            'appointment_handling': self.appointment_handling,
+            'pricing_info': self.pricing_info,
+            'special_instructions': self.special_instructions,
             'ai_instructions': self.ai_instructions,
             'notification_email': self.notification_email,
             'notification_phone': self.notification_phone,

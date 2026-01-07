@@ -95,13 +95,22 @@
 
             } catch (error) {
                 console.error('Error loading call details:', error);
-                if (error.message.includes('401') || error.message.includes('token')) {
+
+                // Stop auto-refresh on any error
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                }
+
+                if (error.message.includes('401') || error.message.includes('token') || error.message.includes('Session expired')) {
+                    // Authentication error - redirect to login
                     logout();
                 } else {
+                    // Other errors (404, network, etc.)
                     document.getElementById('call-details').innerHTML = `
                         <div class="card" style="text-align: center; padding: 3rem; color: #ef4444;">
-                            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">Call not found</p>
-                            <p style="font-size: 0.9rem;">This call may have been deleted or you don't have access to it.</p>
+                            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">Error Loading Call</p>
+                            <p style="font-size: 0.9rem;">${error.message || 'This call may have been deleted or you don\'t have access to it.'}</p>
                             <button onclick="window.location.href='/dashboard.html'" class="btn btn-primary" style="margin-top: 1.5rem;">
                                 Back to Dashboard
                             </button>

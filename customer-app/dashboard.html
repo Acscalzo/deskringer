@@ -55,6 +55,22 @@
                 </button>
             </div>
 
+            <!-- Bulk Actions Toolbar -->
+            <div id="bulk-actions-toolbar" style="display: none; background: var(--accent-light); border: 2px solid var(--accent-primary); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span id="selection-count" style="font-weight: 600; color: var(--text-primary);">0 selected</span>
+                        <button onclick="selectAllCalls()" class="btn btn-sm btn-secondary">Select All</button>
+                        <button onclick="clearSelection()" class="btn btn-sm btn-secondary">Clear Selection</button>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="bulkMarkHandled()" class="btn btn-sm btn-primary">✓ Mark Handled</button>
+                        <button onclick="downloadCSV()" class="btn btn-sm btn-primary">⬇ Download CSV</button>
+                        <button onclick="bulkArchive()" class="btn btn-sm btn-danger">🗑 Archive Selected</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Calls Feed -->
             <div id="calls-container">
                 <div class="spinner"></div>
@@ -71,6 +87,7 @@
 
         let currentFilter = 'all';
         let allCalls = [];
+        let selectedCallIds = new Set();
 
         // Load dashboard data
         async function loadDashboard() {
@@ -160,34 +177,43 @@
             }
 
             container.innerHTML = filteredCalls.map(call => `
-                <div class="card call-card" style="margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;"
-                     onclick="viewCall(${call.id})"
-                     onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.3)';"
-                     onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-                                <span style="font-weight: 600; font-size: 1.1rem; color: #e2e8f0;">${call.caller_phone}</span>
-                                ${call.handled ? '<span class="badge badge-success">Handled</span>' : '<span class="badge badge-warning">Needs Attention</span>'}
-                                ${call.callback_requested ? '<span class="badge" style="background: #7c3aed;">Callback Requested</span>' : ''}
-                            </div>
-                            <div style="color: #94a3b8; font-size: 0.875rem;">
-                                ${formatDateTime(call.created_at)}
-                                ${call.duration_seconds ? ` • ${formatDuration(call.duration_seconds)}` : ''}
-                            </div>
+                <div class="card call-card" style="margin-bottom: 1rem; transition: all 0.2s; position: relative;">
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="display: flex; align-items: start; padding-top: 0.25rem;">
+                            <input type="checkbox"
+                                   class="call-checkbox"
+                                   data-call-id="${call.id}"
+                                   ${selectedCallIds.has(call.id) ? 'checked' : ''}
+                                   onclick="toggleCallSelection(${call.id})"
+                                   style="width: 18px; height: 18px; cursor: pointer;">
                         </div>
-                        <button class="btn btn-sm ${call.handled ? 'btn-secondary' : 'btn-primary'}"
-                                onclick="event.stopPropagation(); toggleHandled(${call.id}, ${call.handled})"
-                                style="margin-left: 1rem;">
-                            ${call.handled ? 'Mark Unhandled' : 'Mark Handled'}
-                        </button>
+                        <div style="flex: 1; cursor: pointer;" onclick="viewCall(${call.id})">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">${call.caller_phone}</span>
+                                        ${call.handled ? '<span class="badge badge-success">Handled</span>' : '<span class="badge badge-warning">Needs Attention</span>'}
+                                        ${call.callback_requested ? '<span class="badge" style="background: #7c3aed; color: white;">Callback Requested</span>' : ''}
+                                    </div>
+                                    <div style="color: var(--text-tertiary); font-size: 0.875rem;">
+                                        ${formatDateTime(call.created_at)}
+                                        ${call.duration_seconds ? ` • ${formatDuration(call.duration_seconds)}` : ''}
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm ${call.handled ? 'btn-secondary' : 'btn-primary'}"
+                                        onclick="event.stopPropagation(); toggleHandled(${call.id}, ${call.handled})"
+                                        style="margin-left: 1rem;">
+                                    ${call.handled ? 'Mark Unhandled' : 'Mark Handled'}
+                                </button>
+                            </div>
+                            ${call.summary ? `
+                                <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent-primary);">
+                                    <div style="color: var(--text-tertiary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Summary</div>
+                                    <div style="color: var(--text-primary); line-height: 1.6;">${call.summary}</div>
+                                </div>
+                            ` : '<div style="color: var(--text-muted); font-style: italic;">No summary available</div>'}
+                        </div>
                     </div>
-                    ${call.summary ? `
-                        <div style="background: #1e293b; padding: 1rem; border-radius: 8px; border-left: 3px solid #06b6d4;">
-                            <div style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Summary</div>
-                            <div style="color: #e2e8f0; line-height: 1.6;">${call.summary}</div>
-                        </div>
-                    ` : '<div style="color: #64748b; font-style: italic;">No summary available</div>'}
                 </div>
             `).join('');
         }
@@ -294,6 +320,150 @@
                 renderCalls();
             });
         });
+
+        // Selection management
+        function toggleCallSelection(callId) {
+            if (selectedCallIds.has(callId)) {
+                selectedCallIds.delete(callId);
+            } else {
+                selectedCallIds.add(callId);
+            }
+            updateBulkActionsToolbar();
+        }
+
+        function selectAllCalls() {
+            const visibleCalls = allCalls.filter(c => {
+                if (currentFilter === 'handled') return c.handled;
+                if (currentFilter === 'unhandled') return !c.handled;
+                return true;
+            });
+            visibleCalls.forEach(call => selectedCallIds.add(call.id));
+            renderCalls();
+            updateBulkActionsToolbar();
+        }
+
+        function clearSelection() {
+            selectedCallIds.clear();
+            renderCalls();
+            updateBulkActionsToolbar();
+        }
+
+        function updateBulkActionsToolbar() {
+            const toolbar = document.getElementById('bulk-actions-toolbar');
+            const count = selectedCallIds.size;
+
+            if (count > 0) {
+                toolbar.style.display = 'block';
+                document.getElementById('selection-count').textContent = `${count} selected`;
+            } else {
+                toolbar.style.display = 'none';
+            }
+        }
+
+        // Bulk mark handled
+        async function bulkMarkHandled() {
+            if (selectedCallIds.size === 0) return;
+
+            try {
+                await Promise.all(
+                    Array.from(selectedCallIds).map(id => CallAPI.markHandled(id))
+                );
+
+                selectedCallIds.clear();
+                const callsData = await CallAPI.getAll({ limit: 100 });
+                allCalls = callsData.calls || [];
+                updateCounts();
+                renderCalls();
+                updateBulkActionsToolbar();
+
+                const stats = await CustomerAPI.getStats();
+                renderStats(stats);
+            } catch (error) {
+                console.error('Error marking calls as handled:', error);
+                alert('Failed to mark calls as handled. Please try again.');
+            }
+        }
+
+        // Bulk archive
+        async function bulkArchive() {
+            if (selectedCallIds.size === 0) return;
+
+            const count = selectedCallIds.size;
+            if (!confirm(`Archive ${count} call(s)? They will be hidden from your call list but can be restored if needed.`)) {
+                return;
+            }
+
+            try {
+                await CallAPI.bulkArchive(Array.from(selectedCallIds));
+
+                selectedCallIds.clear();
+                const callsData = await CallAPI.getAll({ limit: 100 });
+                allCalls = callsData.calls || [];
+                updateCounts();
+                renderCalls();
+                updateBulkActionsToolbar();
+
+                const stats = await CustomerAPI.getStats();
+                renderStats(stats);
+            } catch (error) {
+                console.error('Error archiving calls:', error);
+                alert('Failed to archive calls. Please try again.');
+            }
+        }
+
+        // CSV Export
+        function downloadCSV() {
+            if (selectedCallIds.size === 0) return;
+
+            const selectedCalls = allCalls.filter(call => selectedCallIds.has(call.id));
+
+            // CSV headers
+            const headers = [
+                'Date & Time',
+                'Caller Phone',
+                'Caller Name',
+                'Duration',
+                'Status',
+                'Summary',
+                'Full Transcript',
+                'Intent',
+                'Callback Requested',
+                'Handled',
+                'Handled Date'
+            ];
+
+            // Build CSV rows
+            const rows = selectedCalls.map(call => [
+                call.created_at || '',
+                call.caller_phone || '',
+                call.caller_name || '',
+                call.duration_seconds ? formatDuration(call.duration_seconds) : '',
+                call.status || '',
+                (call.summary || '').replace(/"/g, '""'), // Escape quotes
+                (call.transcript || '').replace(/"/g, '""'),
+                call.intent || '',
+                call.callback_requested ? 'Yes' : 'No',
+                call.handled ? 'Yes' : 'No',
+                call.handled_at || ''
+            ]);
+
+            // Combine headers and rows
+            const csvContent = [
+                headers.map(h => `"${h}"`).join(','),
+                ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+            ].join('\n');
+
+            // Download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `deskringer-calls-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
         // Mark all button handler
         document.getElementById('mark-all-handled-btn').addEventListener('click', markAllAsHandled);

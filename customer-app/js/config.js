@@ -10,6 +10,8 @@ const API = {
     CALL: (id) => `${API_BASE_URL}/api/portal/calls/${id}`,
     MARK_HANDLED: (id) => `${API_BASE_URL}/api/portal/calls/${id}/mark-handled`,
     MARK_UNHANDLED: (id) => `${API_BASE_URL}/api/portal/calls/${id}/mark-unhandled`,
+    ARCHIVE_CALL: (id) => `${API_BASE_URL}/api/portal/calls/${id}/archive`,
+    BULK_ARCHIVE: `${API_BASE_URL}/api/portal/calls/bulk-archive`,
     SETTINGS: `${API_BASE_URL}/api/portal/settings`,
     CHANGE_PASSWORD: `${API_BASE_URL}/api/portal/change-password`,
 };

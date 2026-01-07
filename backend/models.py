@@ -143,6 +143,8 @@ class Call(db.Model):
     # Customer portal tracking
     handled = db.Column(db.Boolean, default=False)  # Has customer marked this as handled?
     handled_at = db.Column(db.DateTime)  # When was it marked as handled?
+    archived = db.Column(db.Boolean, default=False)  # Has customer archived this call?
+    archived_at = db.Column(db.DateTime)  # When was it archived?
 
     # Costs (for tracking)
     twilio_cost = db.Column(db.Float)
@@ -170,6 +172,8 @@ class Call(db.Model):
             'callback_requested': self.callback_requested,
             'handled': self.handled,
             'handled_at': self.handled_at.isoformat() if self.handled_at else None,
+            'archived': self.archived,
+            'archived_at': self.archived_at.isoformat() if self.archived_at else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'ended_at': self.ended_at.isoformat() if self.ended_at else None
         }

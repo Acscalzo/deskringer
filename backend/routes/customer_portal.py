@@ -66,8 +66,8 @@ def get_customer_calls():
     limit = request.args.get('limit', 50, type=int)
     offset = request.args.get('offset', 0, type=int)
 
-    # Build query
-    query = Call.query.filter_by(customer_id=customer_id)
+    # Build query - exclude archived by default
+    query = Call.query.filter_by(customer_id=customer_id, archived=False)
 
     # Filter by status if provided
     if status == 'handled':
@@ -230,6 +230,60 @@ def change_customer_password():
     return jsonify({'message': 'Password changed successfully'}), 200
 
 
+@customer_portal_bp.route('/calls/bulk-archive', methods=['POST'])
+@jwt_required()
+def bulk_archive_calls():
+    """Archive multiple calls"""
+    customer_id = int(get_jwt_identity())
+    data = request.get_json()
+
+    if not data or not data.get('call_ids'):
+        return jsonify({'error': 'call_ids required'}), 400
+
+    call_ids = data['call_ids']
+
+    # Verify all calls belong to this customer and archive them
+    calls = Call.query.filter(
+        Call.id.in_(call_ids),
+        Call.customer_id == customer_id
+    ).all()
+
+    if len(calls) != len(call_ids):
+        return jsonify({'error': 'Some calls not found or do not belong to you'}), 404
+
+    for call in calls:
+        call.archived = True
+        call.archived_at = datetime.utcnow()
+
+    db.session.commit()
+
+    return jsonify({
+        'message': f'{len(calls)} call(s) archived successfully',
+        'archived_count': len(calls)
+    }), 200
+
+
+@customer_portal_bp.route('/calls/<int:call_id>/archive', methods=['POST'])
+@jwt_required()
+def archive_call(call_id):
+    """Archive a single call"""
+    customer_id = int(get_jwt_identity())
+
+    call = Call.query.filter_by(id=call_id, customer_id=customer_id).first()
+
+    if not call:
+        return jsonify({'error': 'Call not found'}), 404
+
+    call.archived = True
+    call.archived_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Call archived successfully',
+        'call': call.to_dict()
+    }), 200
+
+
 @customer_portal_bp.route('/stats', methods=['GET'])
 @jwt_required()
 def get_customer_stats():
@@ -242,18 +296,20 @@ def get_customer_stats():
 
     from sqlalchemy import func
 
-    total_calls = Call.query.filter_by(customer_id=customer_id).count()
-    handled_calls = Call.query.filter_by(customer_id=customer_id, handled=True).count()
-    unhandled_calls = Call.query.filter_by(customer_id=customer_id, handled=False).count()
+    # Only count non-archived calls
+    total_calls = Call.query.filter_by(customer_id=customer_id, archived=False).count()
+    handled_calls = Call.query.filter_by(customer_id=customer_id, handled=True, archived=False).count()
+    unhandled_calls = Call.query.filter_by(customer_id=customer_id, handled=False, archived=False).count()
 
-    # Calls today
-    calls_today = Call.query.filter_by(customer_id=customer_id).filter(
+    # Calls today (non-archived)
+    calls_today = Call.query.filter_by(customer_id=customer_id, archived=False).filter(
         func.date(Call.created_at) == func.current_date()
     ).count()
 
-    # Average call duration
+    # Average call duration (non-archived)
     avg_duration = db.session.query(func.avg(Call.duration_seconds)).filter(
-        Call.customer_id == customer_id
+        Call.customer_id == customer_id,
+        Call.archived == False
     ).scalar() or 0
 
     return jsonify({

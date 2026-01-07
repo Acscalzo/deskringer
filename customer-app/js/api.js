@@ -84,5 +84,18 @@ const CallAPI = {
         return await apiRequest(API.MARK_UNHANDLED(id), {
             method: 'POST'
         });
+    },
+
+    archive: async (id) => {
+        return await apiRequest(API.ARCHIVE_CALL(id), {
+            method: 'POST'
+        });
+    },
+
+    bulkArchive: async (callIds) => {
+        return await apiRequest(API.BULK_ARCHIVE, {
+            method: 'POST',
+            body: JSON.stringify({ call_ids: callIds })
+        });
     }
 };

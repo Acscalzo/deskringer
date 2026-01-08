@@ -40,10 +40,9 @@
             <!-- Business Information Card -->
             <div class="card settings-card">
                 <div class="settings-card-header">
-                    <div class="settings-card-icon">🏢</div>
                     <div>
                         <h2 style="margin: 0; font-size: 1.25rem;">Business Information</h2>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Update your company details</p>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: var(--text-tertiary);">Update your company details</p>
                     </div>
                 </div>
 
@@ -84,8 +83,8 @@
                     <div class="form-divider"></div>
 
                     <div class="form-section-header">
-                        <h3 style="margin: 0; font-size: 1rem;">🕐 Business Hours</h3>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Set your operating hours for each day</p>
+                        <h3 style="margin: 0; font-size: 1rem;">Business Hours</h3>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: var(--text-tertiary);">Set your operating hours for each day</p>
                     </div>
 
                     <div id="business-hours-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -102,8 +101,8 @@
                     <div class="form-divider"></div>
 
                     <div class="form-section-header">
-                        <h3 style="margin: 0; font-size: 1rem;">📞 Call Transfer</h3>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Where should callers be transferred if needed?</p>
+                        <h3 style="margin: 0; font-size: 1rem;">Call Transfer</h3>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: var(--text-tertiary);">Where should callers be transferred if needed?</p>
                     </div>
 
                     <div class="form-field">
@@ -115,8 +114,8 @@
                     <div class="form-divider"></div>
 
                     <div class="form-section-header">
-                        <h3 style="margin: 0; font-size: 1rem;">🤖 AI Configuration</h3>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Customize how your AI receptionist responds</p>
+                        <h3 style="margin: 0; font-size: 1rem;">AI Configuration</h3>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: var(--text-tertiary);">Customize how your AI receptionist responds</p>
                     </div>
 
                     <div class="form-field">
@@ -186,7 +185,7 @@
 
                     <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
                         <button type="submit" class="btn btn-primary" id="save-settings-btn" style="min-width: 150px;">
-                            💾 Save Changes
+                            Save Changes
                         </button>
                     </div>
                 </form>
@@ -195,10 +194,9 @@
             <!-- DeskRinger Number Card -->
             <div class="card settings-card">
                 <div class="settings-card-header">
-                    <div class="settings-card-icon">📞</div>
                     <div>
                         <h2 style="margin: 0; font-size: 1.25rem;">Your DeskRinger Number</h2>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">This is the number customers call to reach your AI receptionist</p>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: var(--text-tertiary);">This is the number customers call to reach your AI receptionist</p>
                     </div>
                 </div>
                 <div class="deskringer-number-display">
@@ -210,10 +208,9 @@
             <!-- Change Password Card -->
             <div class="card settings-card">
                 <div class="settings-card-header">
-                    <div class="settings-card-icon">🔐</div>
                     <div>
                         <h2 style="margin: 0; font-size: 1.25rem;">Change Password</h2>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Update your portal login password</p>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: var(--text-tertiary);">Update your portal login password</p>
                     </div>
                 </div>
 
@@ -238,7 +235,7 @@
 
                     <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
                         <button type="submit" class="btn btn-primary" id="change-password-btn" style="min-width: 150px;">
-                            🔑 Change Password
+                            Change Password
                         </button>
                     </div>
                 </form>
@@ -426,7 +423,7 @@
                 messageDiv.style.color = '#fca5a5';
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = '💾 Save Changes';
+                submitBtn.textContent = 'Save Changes';
             }
         });
 
@@ -500,9 +497,6 @@
         }
 
         .settings-card-header {
-            display: flex;
-            gap: 1rem;
-            align-items: start;
             padding-bottom: 1.5rem;
             border-bottom: 2px solid var(--border-color);
             margin-bottom: 2rem;
@@ -515,12 +509,6 @@
 
         .settings-card-header p {
             color: var(--text-tertiary);
-        }
-
-        .settings-card-icon {
-            font-size: 2rem;
-            line-height: 1;
-            flex-shrink: 0;
         }
 
         .form-grid {

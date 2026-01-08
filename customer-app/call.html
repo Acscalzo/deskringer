@@ -135,7 +135,7 @@
                 <div class="card" style="margin-bottom: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
                         <div>
-                            <h1 style="font-size: 1.75rem; margin-bottom: 0.75rem; color: var(--text-primary);">Call from ${call.caller_phone}</h1>
+                            <h1 style="font-size: 1.75rem; margin-bottom: 0.75rem; color: var(--text-primary);">Call from ${formatPhoneNumber(call.caller_phone)}</h1>
                             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                                 ${call.status === 'in_progress' ? '<span class="badge" style="background: #0891b2; color: white; animation: pulse 2s infinite;">🔴 In Progress</span>' : ''}
                                 ${call.status === 'completed' ? '<span class="badge" style="background: #059669; color: white;">Completed</span>' : ''}
@@ -153,19 +153,19 @@
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
                         <div>
-                            <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Date & Time</div>
-                            <div style="color: #e2e8f0; font-weight: 500;">${formatFullDateTime(call.created_at)}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.5rem; font-weight: 600;">Date & Time</div>
+                            <div style="color: var(--text-primary); font-weight: 500;">${formatFullDateTime(call.created_at)}</div>
                         </div>
                         ${call.duration_seconds ? `
                             <div>
-                                <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Duration</div>
-                                <div style="color: #e2e8f0; font-weight: 500;">${formatDuration(call.duration_seconds)}</div>
+                                <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.5rem; font-weight: 600;">Duration</div>
+                                <div style="color: var(--text-primary); font-weight: 500;">${formatDuration(call.duration_seconds)}</div>
                             </div>
                         ` : ''}
                         ${call.intent ? `
                             <div>
-                                <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Intent</div>
-                                <div style="color: #e2e8f0; font-weight: 500; text-transform: capitalize;">${call.intent}</div>
+                                <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.5rem; font-weight: 600;">Intent</div>
+                                <div style="color: var(--text-primary); font-weight: 500; text-transform: capitalize;">${call.intent}</div>
                             </div>
                         ` : ''}
                     </div>
@@ -174,9 +174,9 @@
                 <!-- Summary Card -->
                 ${call.summary ? `
                     <div class="card" style="margin-bottom: 1.5rem;">
-                        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: #e2e8f0;">Summary</h2>
-                        <div style="background: #1e293b; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #06b6d4;">
-                            <p style="color: #e2e8f0; line-height: 1.7; white-space: pre-wrap;">${call.summary}</p>
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--text-primary); font-weight: 600;">Summary</h2>
+                        <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--accent-primary);">
+                            <p style="color: var(--text-primary); line-height: 1.7; white-space: pre-wrap;">${call.summary}</p>
                         </div>
                     </div>
                 ` : ''}
@@ -184,17 +184,17 @@
                 <!-- Transcript Card -->
                 ${call.transcript && call.transcript.length > 0 ? `
                     <div class="card">
-                        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: #e2e8f0;">Full Conversation</h2>
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text-primary); font-weight: 600;">Full Conversation</h2>
                         <div class="transcript">
                             ${call.transcript.map(entry => `
                                 <div class="transcript-entry ${entry.speaker}" style="margin-bottom: 1.5rem;">
                                     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-                                        <div style="font-weight: 600; color: ${entry.speaker === 'ai' ? '#06b6d4' : '#f59e0b'}; text-transform: capitalize;">
+                                        <div style="font-weight: 600; color: ${entry.speaker === 'ai' ? 'var(--accent-primary)' : '#f59e0b'}; text-transform: capitalize;">
                                             ${entry.speaker === 'ai' ? 'DeskRinger AI' : 'Caller'}
                                         </div>
-                                        ${entry.timestamp ? `<div style="color: #64748b; font-size: 0.75rem;">${formatTime(entry.timestamp)}</div>` : ''}
+                                        ${entry.timestamp ? `<div style="color: var(--text-tertiary); font-size: 0.75rem;">${formatTime(entry.timestamp)}</div>` : ''}
                                     </div>
-                                    <div style="background: ${entry.speaker === 'ai' ? '#1e293b' : '#78350f'}; padding: 1rem; border-radius: 8px; color: #e2e8f0; line-height: 1.6;">
+                                    <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; color: var(--text-primary); line-height: 1.6; border: 1px solid var(--border-color);">
                                         ${entry.message}
                                     </div>
                                 </div>
@@ -203,8 +203,8 @@
                     </div>
                 ` : `
                     <div class="card">
-                        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: #e2e8f0;">Transcript</h2>
-                        <p style="color: #64748b; font-style: italic;">No transcript available for this call.</p>
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--text-primary); font-weight: 600;">Transcript</h2>
+                        <p style="color: var(--text-tertiary); font-style: italic;">No transcript available for this call.</p>
                     </div>
                 `}
             `;
@@ -254,6 +254,19 @@
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        }
+
+        function formatPhoneNumber(phone) {
+            if (!phone) return '';
+            // Remove all non-digits
+            const cleaned = phone.replace(/\D/g, '');
+            // Remove leading 1 if present (US country code)
+            const number = cleaned.startsWith('1') && cleaned.length === 11 ? cleaned.substring(1) : cleaned;
+            // Format as (XXX)XXX-XXXX
+            if (number.length === 10) {
+                return `(${number.substring(0, 3)})${number.substring(3, 6)}-${number.substring(6)}`;
+            }
+            return phone; // Return original if not 10 digits
         }
 
         // Load data on page load

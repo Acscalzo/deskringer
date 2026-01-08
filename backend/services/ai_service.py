@@ -70,16 +70,40 @@ Never say goodbye or end the call unless:
         # Add current message
         messages.append({"role": "user", "content": caller_message})
 
-        # Get response from GPT-4o-mini (optimized for speed)
+        # Define transfer function for AI to call
+        transfer_function = {
+            "name": "transfer_to_human",
+            "description": "Transfer the caller to a human staff member when requested or when you cannot answer their question",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "description": "Brief reason for the transfer"
+                    }
+                },
+                "required": ["reason"]
+            }
+        }
+
+        # Get response from GPT-4o-mini with function calling
         response = self.client.chat.completions.create(
-            model="gpt-4o-mini",  # 50% faster than gpt-4o, 80% cheaper, still high quality
+            model="gpt-4o-mini",
             messages=messages,
-            temperature=0.5,  # Balanced for natural variety
-            max_tokens=85,  # Allows complete responses without cutting off
-            presence_penalty=0.3  # Reduce repetition
+            temperature=0.5,
+            max_tokens=85,
+            presence_penalty=0.3,
+            tools=[{"type": "function", "function": transfer_function}],
+            tool_choice="auto"
         )
 
-        ai_response = response.choices[0].message.content
+        # Check if AI wants to transfer the call
+        response_message = response.choices[0].message
+        if response_message.tool_calls:
+            # AI wants to transfer - return a special marker
+            return "__TRANSFER_CALL__"
+
+        ai_response = response_message.content or "I'm sorry, could you repeat that?"
 
         return ai_response
 

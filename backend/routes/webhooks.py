@@ -130,6 +130,48 @@ def twilio_gather_webhook():
     ai_service = AIService()
     ai_response = ai_service.get_response(call.customer, caller_message, conversation_history)
 
+    # Check if AI wants to transfer the call
+    if ai_response == "__TRANSFER_CALL__":
+        # Log the transfer request
+        transfer_message = "Transferring you to a staff member now. Please hold."
+        log = CallLog(
+            call_id=call.id,
+            speaker='ai',
+            message=transfer_message
+        )
+        db.session.add(log)
+
+        if call.transcript:
+            call.transcript += f"\n\nCaller: {caller_message}\nAI: {transfer_message}"
+        else:
+            call.transcript = f"Caller: {caller_message}\nAI: {transfer_message}"
+
+        db.session.commit()
+
+        # Return TwiML to transfer the call
+        api_base_url = current_app.config['API_BASE_URL']
+        transfer_number = call.customer.forward_to_number
+
+        if not transfer_number:
+            # No transfer number configured - fallback
+            twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
+            <Response>
+                <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("I'm sorry, but I'm unable to transfer you at this time. Please call back later.")}&amp;call_id={call.id}</Play>
+                <Hangup/>
+            </Response>'''
+        else:
+            twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
+            <Response>
+                <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote(transfer_message)}&amp;call_id={call.id}</Play>
+                <Dial timeout="20" callerId="{call.caller_phone}">
+                    <Number>{transfer_number}</Number>
+                </Dial>
+                <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("Sorry, we couldn't reach anyone. Please try calling back later.")}&amp;call_id={call.id}</Play>
+                <Hangup/>
+            </Response>'''
+
+        return twiml, 200, {'Content-Type': 'text/xml'}
+
     # Log AI response
     log = CallLog(
         call_id=call.id,

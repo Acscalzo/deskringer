@@ -154,16 +154,20 @@ def twilio_gather_webhook():
 
         if not transfer_number:
             # No transfer number configured - fallback
+            print(f"No transfer number configured for customer {call.customer.id}")
             twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
             <Response>
                 <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("I'm sorry, but I'm unable to transfer you at this time. Please call back later.")}&amp;call_id={call.id}</Play>
                 <Hangup/>
             </Response>'''
         else:
+            print(f"Transferring call {call.id} to {transfer_number}")
+            # Use the DeskRinger number as callerId instead of the caller's phone
+            # This avoids caller ID verification issues
             twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
             <Response>
                 <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote(transfer_message)}&amp;call_id={call.id}</Play>
-                <Dial timeout="20" callerId="{call.caller_phone}">
+                <Dial timeout="30" callerId="{call.customer.deskringer_number}">
                     <Number>{transfer_number}</Number>
                 </Dial>
                 <Play>{api_base_url}/api/webhooks/twilio/tts?text={quote("Sorry, we couldn't reach anyone. Please try calling back later.")}&amp;call_id={call.id}</Play>

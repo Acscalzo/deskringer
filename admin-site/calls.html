@@ -33,7 +33,12 @@
     <!-- Main Content -->
     <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
         <div class="fade-in">
-            <h1 style="margin-bottom: 2rem; font-size: 2rem;">Call Logs</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1 style="margin: 0; font-size: 2rem;">Call Logs</h1>
+                <div id="live-indicator" style="padding: 0.5rem 1rem; background: #0891b2; color: white; border-radius: 8px; font-size: 0.875rem; font-weight: 600;">
+                    🔴 Live Updates
+                </div>
+            </div>
 
             <!-- Call Stats -->
             <div class="stats-grid" style="margin-bottom: 2rem;">
@@ -84,21 +89,29 @@
         // Require authentication
         requireAuth();
 
-        // Load admin info and calls
-        async function loadPage() {
-            try {
-                const admin = await AdminAPI.getMe();
-                document.getElementById('admin-name').textContent = admin.name || admin.email;
+        let refreshInterval = null;
 
-                const stats = await AdminAPI.getStats();
-                document.getElementById('total-calls').textContent = stats.calls.total;
-                document.getElementById('today-calls').textContent = stats.calls.today;
-                document.getElementById('avg-duration').textContent = formatDuration(stats.calls.avg_duration_seconds);
+        // Load admin info and calls
+        async function loadPage(silent = false) {
+            try {
+                if (!silent) {
+                    const admin = await AdminAPI.getMe();
+                    document.getElementById('admin-name').textContent = admin.name || admin.email;
+
+                    const stats = await AdminAPI.getStats();
+                    document.getElementById('total-calls').textContent = stats.calls.total;
+                    document.getElementById('today-calls').textContent = stats.calls.today;
+                    document.getElementById('avg-duration').textContent = formatDuration(stats.calls.avg_duration_seconds);
+                }
 
                 await loadCalls();
             } catch (error) {
                 console.error('Error loading page:', error);
                 if (error.message.includes('401') || error.message.includes('token')) {
+                    if (refreshInterval) {
+                        clearInterval(refreshInterval);
+                        refreshInterval = null;
+                    }
                     logout();
                 }
             }
@@ -138,8 +151,8 @@
                                 ${calls.map(call => `
                                     <tr>
                                         <td>${formatDateTime(call.created_at)}</td>
-                                        <td>Customer #${call.customer_id}</td>
-                                        <td>${call.caller_phone || 'Unknown'}</td>
+                                        <td>${call.customer_business_name || 'Unknown'}</td>
+                                        <td>${formatPhoneNumber(call.caller_phone) || 'Unknown'}</td>
                                         <td>${formatDuration(call.duration_seconds)}</td>
                                         <td><span class="badge ${getStatusBadge(call.status)}">${call.status || 'N/A'}</span></td>
                                         <td>${call.callback_requested ? '<span class="badge badge-warning">Yes</span>' : 'No'}</td>
@@ -186,31 +199,34 @@
                                 ${formatDuration(call.duration_seconds)}
                             </div>
                             <div>
+                                <strong>Customer:</strong><br>
+                                ${call.customer_business_name || 'Unknown'}
+                            </div>
+                            <div>
                                 <strong>Caller:</strong><br>
-                                ${call.caller_phone || 'Unknown'}
+                                ${formatPhoneNumber(call.caller_phone) || 'Unknown'}
                             </div>
                             <div>
                                 <strong>Status:</strong><br>
                                 <span class="badge ${getStatusBadge(call.status)}">${call.status || 'N/A'}</span>
                             </div>
+                            ${call.intent ? `
+                                <div>
+                                    <strong>Intent:</strong><br>
+                                    ${call.intent}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
 
                     ${call.summary ? `
                         <div style="margin-bottom: 1.5rem;">
-                            <h3 style="margin-bottom: 0.5rem;">Summary</h3>
-                            <p style="color: #cbd5e1;">${call.summary}</p>
-                        </div>
-                    ` : ''}
-
-                    ${call.transcript ? `
-                        <div>
-                            <h3 style="margin-bottom: 0.5rem;">Transcript</h3>
-                            <div style="background: #0f172a; padding: 1rem; border-radius: 8px; max-height: 400px; overflow-y: auto;">
-                                <pre style="color: #cbd5e1; white-space: pre-wrap; margin: 0;">${call.transcript}</pre>
+                            <h3 style="margin-bottom: 0.5rem;">Call Summary</h3>
+                            <div style="background: #0f172a; padding: 1rem; border-radius: 8px; border-left: 4px solid #0891b2;">
+                                <p style="color: #cbd5e1; white-space: pre-wrap; margin: 0;">${call.summary}</p>
                             </div>
                         </div>
-                    ` : '<p style="color: #64748b;">No transcript available.</p>'}
+                    ` : '<p style="color: #64748b;">No summary available for this call.</p>'}
 
                     ${call.callback_requested ? `
                         <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 8px; color: #92400e;">
@@ -218,6 +234,12 @@
                             This caller requested a callback from the customer.
                         </div>
                     ` : ''}
+
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: #1e293b; border-radius: 8px; border-left: 4px solid #64748b;">
+                        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">
+                            <strong>Privacy Notice:</strong> Full call transcripts are only accessible to customers for privacy and compliance reasons. Admins can view call summaries and metadata.
+                        </p>
+                    </div>
                 `;
             } catch (error) {
                 container.innerHTML = `
@@ -242,8 +264,33 @@
             return badges[status] || 'badge-info';
         }
 
+        function formatPhoneNumber(phone) {
+            if (!phone) return '';
+            // Remove all non-digits
+            const cleaned = phone.replace(/\D/g, '');
+            // Remove leading 1 if present (US country code)
+            const number = cleaned.startsWith('1') && cleaned.length === 11 ? cleaned.substring(1) : cleaned;
+            // Format as (XXX) XXX-XXXX
+            if (number.length === 10) {
+                return `(${number.substring(0, 3)}) ${number.substring(3, 6)}-${number.substring(6)}`;
+            }
+            return phone; // Return original if not 10 digits
+        }
+
         // Load page on load
         loadPage();
+
+        // Set up auto-refresh every 5 seconds for live updates
+        refreshInterval = setInterval(() => {
+            loadPage(true);
+        }, 5000);
+
+        // Clean up interval when leaving page
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
     </script>
 </body>
 </html>

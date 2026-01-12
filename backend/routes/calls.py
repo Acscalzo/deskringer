@@ -13,6 +13,7 @@ def get_calls():
     status = request.args.get('status')
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 50, type=int)
+    admin_view = request.args.get('admin_view', 'false').lower() == 'true'
 
     query = Call.query
 
@@ -29,7 +30,7 @@ def get_calls():
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
     return jsonify({
-        'calls': [call.to_dict() for call in pagination.items],
+        'calls': [call.to_dict(admin_view=admin_view) for call in pagination.items],
         'total': pagination.total,
         'page': page,
         'pages': pagination.pages,
@@ -41,12 +42,13 @@ def get_calls():
 @jwt_required()
 def get_call(call_id):
     """Get a specific call with full details and logs"""
+    admin_view = request.args.get('admin_view', 'false').lower() == 'true'
     call = Call.query.get(call_id)
 
     if not call:
         return jsonify({'error': 'Call not found'}), 404
 
-    return jsonify(call.to_dict(include_logs=True)), 200
+    return jsonify(call.to_dict(include_logs=True, admin_view=admin_view)), 200
 
 
 @calls_bp.route('/<int:call_id>/transcript', methods=['GET'])

@@ -240,6 +240,29 @@
                     </div>
                 </form>
             </div>
+
+            <!-- Appearance Settings Card -->
+            <div class="card settings-card">
+                <div class="settings-card-header">
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.25rem;">Appearance</h2>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: var(--text-tertiary);">Choose your preferred theme</p>
+                    </div>
+                </div>
+
+                <div style="max-width: 500px;">
+                    <div style="display: flex; gap: 1rem;">
+                        <label class="theme-option" style="flex: 1; padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <input type="radio" name="theme" value="light" id="theme-light" style="margin-right: 0.5rem;">
+                            <span style="font-weight: 500;">Light Mode</span>
+                        </label>
+                        <label class="theme-option" style="flex: 1; padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <input type="radio" name="theme" value="dark" id="theme-dark" style="margin-right: 0.5rem;">
+                            <span style="font-weight: 500;">Dark Mode</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -482,6 +505,59 @@
 
         // Load data on page load
         loadCustomerData();
+
+        // Initialize theme toggle
+        function initThemeToggle() {
+            const currentTheme = ThemeManager.getCurrentTheme();
+            const lightRadio = document.getElementById('theme-light');
+            const darkRadio = document.getElementById('theme-dark');
+
+            // Set the correct radio button
+            if (currentTheme === 'dark') {
+                darkRadio.checked = true;
+            } else {
+                lightRadio.checked = true;
+            }
+
+            // Add event listeners
+            lightRadio.addEventListener('change', () => {
+                if (lightRadio.checked) {
+                    ThemeManager.setTheme('light');
+                }
+            });
+
+            darkRadio.addEventListener('change', () => {
+                if (darkRadio.checked) {
+                    ThemeManager.setTheme('dark');
+                }
+            });
+
+            // Add visual feedback on selected option
+            function updateThemeOptionStyles() {
+                const currentTheme = ThemeManager.getCurrentTheme();
+                const lightLabel = lightRadio.closest('.theme-option');
+                const darkLabel = darkRadio.closest('.theme-option');
+
+                if (currentTheme === 'dark') {
+                    darkLabel.style.borderColor = 'var(--accent-primary)';
+                    darkLabel.style.background = 'var(--bg-tertiary)';
+                    lightLabel.style.borderColor = 'var(--border-color)';
+                    lightLabel.style.background = 'transparent';
+                } else {
+                    lightLabel.style.borderColor = 'var(--accent-primary)';
+                    lightLabel.style.background = 'var(--bg-tertiary)';
+                    darkLabel.style.borderColor = 'var(--border-color)';
+                    darkLabel.style.background = 'transparent';
+                }
+            }
+
+            updateThemeOptionStyles();
+            lightRadio.addEventListener('change', updateThemeOptionStyles);
+            darkRadio.addEventListener('change', updateThemeOptionStyles);
+        }
+
+        // Initialize theme toggle after page load
+        initThemeToggle();
     </script>
 
     <style>

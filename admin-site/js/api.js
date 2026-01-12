@@ -99,17 +99,20 @@ const CustomerAPI = {
 // Call API
 const CallAPI = {
     getAll: async (params = {}) => {
+        // Add admin_view=true for admin dashboard
+        params.admin_view = 'true';
         const queryString = new URLSearchParams(params).toString();
         const url = queryString ? `${API.CALLS}?${queryString}` : API.CALLS;
         return await apiRequest(url);
     },
 
     getById: async (id) => {
-        return await apiRequest(API.CALL(id));
+        // Add admin_view=true for admin dashboard
+        return await apiRequest(`${API.CALL(id)}?admin_view=true`);
     },
 
     getRecent: async (limit = 10) => {
-        return await apiRequest(`${API.RECENT_CALLS}?limit=${limit}`);
+        return await apiRequest(`${API.RECENT_CALLS}?limit=${limit}&admin_view=true`);
     }
 };
 

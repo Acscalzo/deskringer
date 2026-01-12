@@ -267,7 +267,14 @@ class Call(db.Model):
     # Relationships
     logs = db.relationship('CallLog', backref='call', lazy='dynamic', cascade='all, delete-orphan')
 
-    def to_dict(self, include_logs=False):
+    def to_dict(self, include_logs=False, admin_view=False):
+        """
+        Convert call to dictionary
+
+        Args:
+            include_logs: Include detailed call logs
+            admin_view: For admin dashboard - includes customer name but NOT transcript
+        """
         data = {
             'id': self.id,
             'customer_id': self.customer_id,
@@ -276,8 +283,6 @@ class Call(db.Model):
             'twilio_call_sid': self.twilio_call_sid,
             'duration_seconds': self.duration_seconds,
             'status': self.status,
-            'transcript': self.transcript,
-            'summary': self.summary,
             'intent': self.intent,
             'callback_requested': self.callback_requested,
             'handled': self.handled,
@@ -288,8 +293,20 @@ class Call(db.Model):
             'ended_at': self.ended_at.isoformat() if self.ended_at else None
         }
 
+        # Include customer business name for admin view
+        if admin_view and self.customer:
+            data['customer_business_name'] = self.customer.business_name
+            # Admin can see summary but NOT full transcript (Option B privacy)
+            data['summary'] = self.summary
+        else:
+            # Customer portal view - include full transcript
+            data['transcript'] = self.transcript
+            data['summary'] = self.summary
+
         if include_logs:
-            data['logs'] = [log.to_dict() for log in self.logs.order_by(CallLog.created_at)]
+            # Only include logs for customer view, not admin
+            if not admin_view:
+                data['logs'] = [log.to_dict() for log in self.logs.order_by(CallLog.created_at)]
 
         return data
 

@@ -182,7 +182,7 @@
                 ` : ''}
 
                 <!-- Transcript Card -->
-                ${call.transcript && call.transcript.length > 0 ? `
+                ${call.transcript && Array.isArray(call.transcript) && call.transcript.length > 0 ? `
                     <div class="card">
                         <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text-primary); font-weight: 600;">Full Conversation</h2>
                         <div class="transcript">

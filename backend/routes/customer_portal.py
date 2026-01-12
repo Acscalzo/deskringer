@@ -320,8 +320,10 @@ def get_customer_stats():
     unhandled_calls = Call.query.filter_by(customer_id=customer_id, handled=False, archived=False).count()
 
     # Calls today (non-archived)
+    from datetime import date
+    today = date.today()
     calls_today = Call.query.filter_by(customer_id=customer_id, archived=False).filter(
-        func.date(Call.created_at) == func.current_date()
+        func.date(Call.created_at) == today
     ).count()
 
     # Average call duration (non-archived)

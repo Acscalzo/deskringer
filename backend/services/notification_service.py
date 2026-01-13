@@ -191,19 +191,56 @@ class NotificationService:
     def generate_summary(self, customer, call):
         """
         Generate a brief AI summary of what the caller wanted
-        Uses the notification_instructions to format appropriately
+        Uses GPT to create a concise, actionable summary
         """
-        # TODO: Could use GPT to generate a smart summary
-        # For now, use a simple heuristic
+        from openai import OpenAI
 
         transcript = call.transcript or ""
 
-        # Simple summary based on first caller message
-        lines = transcript.split('\n')
-        caller_messages = [line for line in lines if line.startswith('Caller:')]
+        # If no transcript, return generic message
+        if not transcript or len(transcript.strip()) < 10:
+            return "Call received - no transcript available"
 
-        if caller_messages:
-            first_message = caller_messages[0].replace('Caller:', '').strip()
-            return f"Caller said: {first_message[:200]}"
+        try:
+            # Use GPT to generate a smart, concise summary
+            client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
-        return "Call received - check transcript for details"
+            prompt = f"""Summarize this phone call in 1-2 sentences. Focus on:
+- What the caller wanted or needed
+- Any action items or follow-up required
+- Urgency level if applicable
+
+Keep it under 150 characters and make it actionable for the business owner.
+
+Transcript:
+{transcript[:1500]}"""  # Limit transcript length for token efficiency
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that creates concise, actionable summaries of phone calls for busy business owners."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=60
+            )
+
+            summary = response.choices[0].message.content.strip()
+
+            # Fallback if summary is too long
+            if len(summary) > 200:
+                summary = summary[:197] + "..."
+
+            return summary
+
+        except Exception as e:
+            print(f"Error generating AI summary: {e}")
+            # Fallback to simple heuristic
+            lines = transcript.split('\n')
+            caller_messages = [line for line in lines if line.startswith('Caller:')]
+
+            if caller_messages:
+                first_message = caller_messages[0].replace('Caller:', '').strip()
+                return f"Caller said: {first_message[:150]}"
+
+            return "Call received - check transcript for details"

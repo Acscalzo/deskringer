@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - DeskRinger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">DeskRinger</div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/dashboard.html">Calls</a></li>
+                        <li><a href="/settings.html">Settings</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="fade-in">
+            <div class="card">
+                <h1 style="margin-bottom: 1.5rem; font-size: 2rem;">Terms of Service</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.875rem;">Last Updated: January 2026</p>
+
+                <div style="line-height: 1.8; color: var(--text-primary);">
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">1. Agreement to Terms</h2>
+                    <p>By accessing or using DeskRinger's AI receptionist services (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the Service.</p>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">2. Description of Service</h2>
+                    <p>DeskRinger provides AI-powered phone receptionist services that:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Answer incoming calls to your designated phone number</li>
+                        <li>Use artificial intelligence to conduct conversations with callers</li>
+                        <li>Record, transcribe, and summarize calls</li>
+                        <li>Send notifications about received calls</li>
+                        <li>Transfer calls to designated numbers when requested</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">3. Account Registration</h2>
+                    <p>To use the Service, you must:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Provide accurate and complete information</li>
+                        <li>Maintain the security of your account credentials</li>
+                        <li>Be at least 18 years old</li>
+                        <li>Have the authority to bind your business to these Terms</li>
+                        <li>Notify us immediately of any unauthorized access to your account</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">4. Acceptable Use</h2>
+                    <p>You agree to use the Service only for lawful purposes. You will not:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Use the Service for any illegal activities</li>
+                        <li>Violate any applicable telecommunications laws or regulations</li>
+                        <li>Use the Service to make unsolicited marketing calls (spam)</li>
+                        <li>Attempt to access or interfere with our systems or infrastructure</li>
+                        <li>Resell or redistribute the Service without authorization</li>
+                        <li>Use the Service in any way that could damage our reputation</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">5. Call Recording and Compliance</h2>
+                    <p><strong>Important:</strong> All calls are recorded and transcribed. You are solely responsible for:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Complying with all applicable call recording laws in your jurisdiction</li>
+                        <li>Providing required notices to callers that calls are being recorded</li>
+                        <li>Obtaining any necessary consents for call recording</li>
+                        <li>Understanding and complying with one-party and two-party consent laws</li>
+                    </ul>
+                    <p>We are not responsible for your failure to comply with call recording laws. You agree to indemnify us against any claims arising from your non-compliance.</p>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">6. Subscription and Payment</h2>
+                    <p>Service is provided on a subscription basis:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Trial periods (if applicable) convert to paid subscriptions unless cancelled</li>
+                        <li>Payments are processed through Stripe</li>
+                        <li>Subscriptions automatically renew unless cancelled</li>
+                        <li>You are responsible for all charges incurred under your account</li>
+                        <li>Prices may change with 30 days notice</li>
+                        <li>No refunds for partial months or unused services</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">7. Cancellation</h2>
+                    <p>You may cancel your subscription at any time. Upon cancellation:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Your subscription remains active until the end of the current billing period</li>
+                        <li>You will not be charged for subsequent periods</li>
+                        <li>Your DeskRinger phone number will be deactivated</li>
+                        <li>You will retain access to your call data for 30 days</li>
+                        <li>After 30 days, your data may be permanently deleted</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">8. Service Availability and Limitations</h2>
+                    <p>We strive to provide reliable service, but:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>We do not guarantee 100% uptime</li>
+                        <li>AI responses may not always be accurate or appropriate</li>
+                        <li>Service may be interrupted for maintenance or technical issues</li>
+                        <li>Third-party services (Twilio, OpenAI) may affect service availability</li>
+                        <li>Call quality depends on network conditions beyond our control</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">9. AI Limitations and Disclaimers</h2>
+                    <p><strong>Important:</strong> The AI receptionist is an automated system and:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>May misunderstand callers or provide incorrect information</li>
+                        <li>Should not be relied upon for emergency services or critical communications</li>
+                        <li>Cannot replace human judgment in complex situations</li>
+                        <li>May not be suitable for all business types or use cases</li>
+                    </ul>
+                    <p>You are responsible for monitoring calls and correcting any errors or misunderstandings that occur.</p>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">10. Data Ownership and Usage</h2>
+                    <p>You retain ownership of your call data (recordings, transcripts, etc.). By using the Service, you grant us a license to:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Process, store, and transmit your data to provide the Service</li>
+                        <li>Use aggregated, anonymized data to improve our services</li>
+                        <li>Share data with third-party service providers as described in our Privacy Policy</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">11. Intellectual Property</h2>
+                    <p>The Service, including all software, designs, and content, is owned by DeskRinger and protected by intellectual property laws. You may not:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Copy, modify, or distribute our software or content</li>
+                        <li>Reverse engineer or attempt to extract our source code</li>
+                        <li>Remove or alter any copyright or trademark notices</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">12. Limitation of Liability</h2>
+                    <p><strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW:</strong></p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>The Service is provided "AS IS" without warranties of any kind</li>
+                        <li>We are not liable for any indirect, incidental, or consequential damages</li>
+                        <li>Our total liability is limited to the amount you paid in the past 12 months</li>
+                        <li>We are not liable for lost business, missed calls, or AI errors</li>
+                        <li>We are not liable for third-party service failures (Twilio, OpenAI, etc.)</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">13. Indemnification</h2>
+                    <p>You agree to indemnify and hold harmless DeskRinger from any claims, damages, or expenses arising from:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Your violation of these Terms</li>
+                        <li>Your violation of call recording laws or regulations</li>
+                        <li>Your use of the Service in a negligent or unlawful manner</li>
+                        <li>Content you provide or information the AI communicates on your behalf</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">14. Termination</h2>
+                    <p>We may suspend or terminate your account at any time if:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>You violate these Terms</li>
+                        <li>Payment fails or your account is past due</li>
+                        <li>We suspect fraudulent or illegal activity</li>
+                        <li>We discontinue the Service (with 30 days notice)</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">15. Changes to Terms</h2>
+                    <p>We may modify these Terms at any time. Continued use of the Service after changes constitutes acceptance of the new Terms. Material changes will be communicated via email.</p>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">16. Governing Law</h2>
+                    <p>These Terms are governed by the laws of [Your State/Country], without regard to conflict of law principles. Any disputes will be resolved in the courts of [Your Jurisdiction].</p>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">17. Entire Agreement</h2>
+                    <p>These Terms, together with our Privacy Policy, constitute the entire agreement between you and DeskRinger regarding the Service.</p>
+
+                    <h2 style="margin-top: 2rem; margin-bottom: 1rem;">18. Contact</h2>
+                    <p>For questions about these Terms, please contact us.</p>
+
+                    <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 8px; margin-top: 2rem; border-left: 4px solid var(--accent-primary);">
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">
+                            <strong>Disclaimer:</strong> These Terms of Service are provided as a starting point. We strongly recommend having them reviewed by legal counsel to ensure compliance with all applicable laws and regulations in your jurisdiction, especially regarding call recording, telecommunications, and consumer protection laws.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/theme.js"></script>
+    <script>
+        // Require authentication
+        requireAuth();
+    </script>
+</body>
+</html>

@@ -53,6 +53,10 @@ const AdminAPI = {
                 new_password: newPassword
             })
         });
+    },
+
+    getTrialCustomers: async () => {
+        return await apiRequest(`${API_BASE_URL}/api/admin/trial-customers`);
     }
 };
 

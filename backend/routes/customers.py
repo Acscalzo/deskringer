@@ -48,7 +48,9 @@ def get_customer(customer_id):
 @customers_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_customer():
-    """Create a new customer"""
+    """Create a new customer with auto-generated password and welcome email"""
+    import secrets
+    import string
     data = request.get_json()
 
     if not data or not data.get('business_name') or not data.get('email'):
@@ -57,6 +59,9 @@ def create_customer():
     # Check if email already exists
     if Customer.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'Email already exists'}), 400
+
+    # Generate temporary password (12 characters, mix of letters and numbers)
+    temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
 
     # Create customer with trial period (7 days)
     customer = Customer(
@@ -68,19 +73,130 @@ def create_customer():
         business_type=data.get('business_type'),
         business_hours=data.get('business_hours'),
         forward_to_number=data.get('forward_to_number'),
-        greeting_message=data.get('greeting_message', 'Thank you for calling {business_name}. How can I help you today?'),
+        greeting_message=data.get('greeting_message', f'Thank you for calling {data["business_name"]}. How can I help you today?'),
         ai_instructions=data.get('ai_instructions'),
+        notification_email=data['email'],  # Default notification email to their login email
         subscription_status='trial',
         trial_ends_at=datetime.utcnow() + timedelta(days=7)
     )
 
+    # Set the temporary password
+    customer.set_password(temp_password)
+
     db.session.add(customer)
     db.session.commit()
 
+    # Send welcome email with credentials
+    send_welcome = data.get('send_welcome_email', True)  # Default to True
+    if send_welcome:
+        try:
+            send_welcome_email(customer, temp_password)
+        except Exception as e:
+            print(f"Error sending welcome email: {e}")
+            # Don't fail customer creation if email fails
+
     return jsonify({
         'message': 'Customer created successfully',
-        'customer': customer.to_dict()
+        'customer': customer.to_dict(),
+        'temporary_password': temp_password  # Return it so admin can see it
     }), 201
+
+
+def send_welcome_email(customer, temp_password):
+    """Send welcome email to new customer with login credentials"""
+    import os
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail
+
+    if not os.environ.get('SENDGRID_API_KEY'):
+        print("SendGrid not configured, skipping welcome email")
+        return
+
+    from_email = os.environ.get('NOTIFICATION_FROM_EMAIL', 'notifications@deskringer.com')
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: #6366f1; color: white; padding: 30px; border-radius: 8px 8px 0 0; text-align: center; }}
+            .content {{ background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }}
+            .credentials {{ background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #6366f1; }}
+            .btn {{ background: #6366f1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: 600; }}
+            .footer {{ text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1 style="margin: 0; font-size: 28px;">Welcome to DeskRinger!</h1>
+                <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">Your AI receptionist is ready</p>
+            </div>
+
+            <div class="content">
+                <h2 style="color: #111827; margin-top: 0;">Hello{" " + customer.contact_name if customer.contact_name else ""}!</h2>
+
+                <p style="color: #374151; line-height: 1.6;">
+                    Thank you for choosing DeskRinger. Your AI-powered receptionist service is now active and ready to answer calls for <strong>{customer.business_name}</strong>.
+                </p>
+
+                <div class="credentials">
+                    <h3 style="margin-top: 0; color: #111827;">Your Login Credentials</h3>
+                    <p style="margin: 10px 0;"><strong>Email:</strong> {customer.email}</p>
+                    <p style="margin: 10px 0;"><strong>Temporary Password:</strong> <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-family: monospace;">{temp_password}</code></p>
+                    <p style="color: #ef4444; font-size: 14px; margin-top: 15px;">
+                        <strong>Important:</strong> Please change your password after logging in for the first time.
+                    </p>
+                </div>
+
+                <div style="text-align: center;">
+                    <a href="https://portal.deskringer.com" class="btn">
+                        Access Your Dashboard
+                    </a>
+                </div>
+
+                <h3 style="color: #111827; margin-top: 30px;">What's Next?</h3>
+                <ol style="color: #374151; line-height: 1.8;">
+                    <li>Log in to your customer portal</li>
+                    <li>Configure your business settings and AI instructions</li>
+                    <li>Set up call forwarding if needed</li>
+                    <li>Test your DeskRinger number{": " + customer.deskringer_number if customer.deskringer_number else ""}</li>
+                    <li>Start receiving calls!</li>
+                </ol>
+
+                <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+                    <strong style="color: #1e40af;">Your Trial Period:</strong>
+                    <p style="margin: 8px 0 0 0; color: #1e3a8a;">
+                        You have a 7-day trial to test DeskRinger risk-free. We'll follow up before your trial ends.
+                    </p>
+                </div>
+
+                <p style="color: #374151; line-height: 1.6; margin-top: 30px;">
+                    If you have any questions or need help getting started, please don't hesitate to reach out.
+                </p>
+            </div>
+
+            <div class="footer">
+                <p>DeskRinger - AI Receptionist Service</p>
+                <p>This is an automated message. Please do not reply to this email.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    message = Mail(
+        from_email=from_email,
+        to_emails=customer.email,
+        subject=f'Welcome to DeskRinger - Your Account is Ready!',
+        html_content=html_content
+    )
+
+    sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+    response = sg.send(message)
+    print(f"Welcome email sent to {customer.email}: {response.status_code}")
 
 
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])

@@ -54,6 +54,30 @@
                 </div>
             </div>
 
+            <!-- Test Email Notifications Card -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1rem;">Email Notifications</h2>
+                <p style="color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.875rem;">
+                    Test your email notification configuration. Customers receive email alerts when calls are completed.
+                </p>
+
+                <div id="email-test-message" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
+
+                <form id="test-email-form" style="display: flex; gap: 1rem; align-items: end;">
+                    <div style="flex: 1;">
+                        <label for="test-email-address" style="display: block; color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Test Email Address</label>
+                        <input type="email" id="test-email-address" name="test-email-address" required
+                               placeholder="your@email.com"
+                               style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #f1f5f9; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary" id="send-test-email-btn">
+                            Send Test Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <!-- Change Password Card -->
             <div class="card">
                 <h2 style="margin-bottom: 1.5rem;">Change Password</h2>
@@ -120,6 +144,57 @@
                 }
             }
         }
+
+        // Handle test email form
+        document.getElementById('test-email-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('test-email-address').value;
+            const messageDiv = document.getElementById('email-test-message');
+            const submitBtn = document.getElementById('send-test-email-btn');
+
+            // Clear previous messages
+            messageDiv.style.display = 'none';
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+
+                const response = await fetch(`${API_BASE_URL}/api/admin/test-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.details || data.error || 'Failed to send test email');
+                }
+
+                // Show success message
+                messageDiv.textContent = `Test email sent successfully to ${email}! Check your inbox.`;
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#14532d';
+                messageDiv.style.color = '#86efac';
+
+                // Clear form
+                document.getElementById('test-email-form').reset();
+
+            } catch (error) {
+                console.error('Error sending test email:', error);
+                messageDiv.textContent = error.message || 'Failed to send test email';
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#7f1d1d';
+                messageDiv.style.color = '#fca5a5';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Test Email';
+            }
+        });
 
         // Handle password change form
         document.getElementById('change-password-form').addEventListener('submit', async (e) => {

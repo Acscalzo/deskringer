@@ -40,6 +40,14 @@
                 <div class="spinner"></div>
             </div>
 
+            <!-- Trial Customers -->
+            <div class="card" style="margin-top: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Trial Customers</h2>
+                <div id="trial-customers-container">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
             <!-- Recent Calls -->
             <div class="card" style="margin-top: 2rem;">
                 <h2 style="margin-bottom: 1.5rem;">Recent Calls</h2>
@@ -68,6 +76,10 @@
                 // Load stats
                 const stats = await AdminAPI.getStats();
                 renderStats(stats);
+
+                // Load trial customers
+                const trialData = await AdminAPI.getTrialCustomers();
+                renderTrialCustomers(trialData.trial_customers || []);
 
                 // Load recent calls
                 const callsData = await CallAPI.getRecent(5);
@@ -113,6 +125,74 @@
                         <span class="badge badge-success">✓ Operational</span>
                     </div>
                     <div class="label">All systems running</div>
+                </div>
+            `;
+        }
+
+        function renderTrialCustomers(customers) {
+            const container = document.getElementById('trial-customers-container');
+
+            if (customers.length === 0) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #64748b; padding: 2rem;">
+                        No customers on trial. Add a new customer to get started.
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Business Name</th>
+                                <th>Contact</th>
+                                <th>Created</th>
+                                <th>Trial Ends</th>
+                                <th>Days Left</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${customers.map(customer => {
+                                const daysLeft = customer.days_remaining;
+                                let daysDisplay = 'No expiration set';
+                                let daysClass = '';
+
+                                if (daysLeft !== null) {
+                                    if (customer.is_expired) {
+                                        daysDisplay = `<span class="badge badge-danger">Expired ${Math.abs(daysLeft)} days ago</span>`;
+                                    } else if (daysLeft <= 2) {
+                                        daysDisplay = `<span class="badge badge-danger">${daysLeft} days</span>`;
+                                    } else if (daysLeft <= 5) {
+                                        daysDisplay = `<span class="badge badge-warning">${daysLeft} days</span>`;
+                                    } else {
+                                        daysDisplay = `<span class="badge badge-info">${daysLeft} days</span>`;
+                                    }
+                                }
+
+                                const lastLogin = customer.last_login ? formatDate(customer.last_login) : 'Never';
+
+                                return `
+                                    <tr>
+                                        <td><strong>${customer.business_name}</strong></td>
+                                        <td>${customer.contact_name || 'N/A'}<br/><small style="color: #64748b;">${customer.email}</small></td>
+                                        <td>${formatDate(customer.created_at)}</td>
+                                        <td>${customer.trial_ends_at ? formatDate(customer.trial_ends_at) : 'Not set'}</td>
+                                        <td>${daysDisplay}</td>
+                                        <td>${lastLogin}</td>
+                                        <td>
+                                            <a href="/customers.html?id=${customer.id}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
                 </div>
             `;
         }

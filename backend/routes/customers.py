@@ -106,13 +106,14 @@ def send_welcome_email(customer, temp_password):
     """Send welcome email to new customer with login credentials"""
     import os
     from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail
+    from sendgrid.helpers.mail import Mail, From
 
     if not os.environ.get('SENDGRID_API_KEY'):
         print("SendGrid not configured, skipping welcome email")
         return
 
     from_email = os.environ.get('NOTIFICATION_FROM_EMAIL', 'notifications@deskringer.com')
+    from_name = os.environ.get('NOTIFICATION_FROM_NAME', 'DeskRinger')
 
     html_content = f"""
     <!DOCTYPE html>
@@ -188,7 +189,7 @@ def send_welcome_email(customer, temp_password):
     """
 
     message = Mail(
-        from_email=from_email,
+        from_email=From(from_email, from_name),
         to_emails=customer.email,
         subject=f'Welcome to DeskRinger - Your Account is Ready!',
         html_content=html_content

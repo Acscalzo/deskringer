@@ -201,10 +201,10 @@ def test_email():
 
         # Build test email
         from sendgrid import SendGridAPIClient
-        from sendgrid.helpers.mail import Mail
+        from sendgrid.helpers.mail import Mail, From
 
         message = Mail(
-            from_email=notification_service.from_email,
+            from_email=From(notification_service.from_email, notification_service.from_name),
             to_emails=test_email,
             subject='DeskRinger Email Test',
             html_content=f"""

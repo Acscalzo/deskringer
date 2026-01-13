@@ -14,6 +14,7 @@ class NotificationService:
         # SendGrid for emails
         self.sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
         self.from_email = os.environ.get('NOTIFICATION_FROM_EMAIL', 'notifications@deskringer.com')
+        self.from_name = os.environ.get('NOTIFICATION_FROM_NAME', 'DeskRinger')
 
         # Twilio for SMS (account credentials)
         self.twilio_account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
@@ -46,9 +47,10 @@ class NotificationService:
             # Build email body
             html_content = self._build_email_html(customer, call, transcript_summary)
 
-            # Send email
+            # Send email with sender name
+            from sendgrid.helpers.mail import From
             message = Mail(
-                from_email=self.from_email,
+                from_email=From(self.from_email, self.from_name),
                 to_emails=customer.notification_email,
                 subject=subject,
                 html_content=html_content
